@@ -281,7 +281,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut as fbSignOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyARFzVkmek4o8qQwEi591VKX9M0isQeUmI",
@@ -368,7 +368,13 @@ let editingBlockData = null;
 let blocks = JSON.parse(JSON.stringify(DEFAULT_BLOCKS));
 
 // ── AUTH ──
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
+  // check redirect result first
+  try {
+    var result = await getRedirectResult(auth);
+    if (result && result.user) user = result.user;
+  } catch(e) {}
+
   if (user) {
     currentUser = user;
     document.getElementById('auth-screen').style.display = 'none';
@@ -385,7 +391,7 @@ onAuthStateChanged(auth, user => {
 });
 
 window.signInGoogle = async function() {
-  try { await signInWithPopup(auth, provider); } catch(e) { showToast('Ошибка входа'); }
+  try { await signInWithRedirect(auth, provider); } catch(e) { showToast('Ошибка входа'); }
 };
 window.signOut = async function() {
   if (confirm('Выйти из аккаунта?')) { await fbSignOut(auth); }
