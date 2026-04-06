@@ -6,9 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Трекер">
+<meta name="apple-mobile-web-app-title" content="Habits Creator">
 <meta name="theme-color" content="#1a1a1a">
-<title>Трекер Давида</title>
+<title>Habits Creator</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F4F0; color: #1a1a1a; min-height: 100vh; }
@@ -112,20 +112,53 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .week-summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; padding: 4px 0; border-bottom: 1px solid #f5f5f5; }
 .week-summary-row:last-child { border-bottom: none; }
 .week-summary-row span:last-child { font-weight: 600; color: #1a1a1a; }
+
+/* ── EDIT MODE ── */
+.edit-mode-btn { width: 100%; padding: 10px; font-size: 13px; font-weight: 500; border-radius: 12px; border: 1.5px solid #e0e0e0; background: transparent; color: #555; cursor: pointer; font-family: inherit; margin-bottom: 14px; -webkit-tap-highlight-color: transparent; }
+.edit-mode-btn.active { background: #FFF3E0; border-color: #FAC775; color: #854F0B; }
+.card.edit-active { border: 2px solid #e0e0e0; position: relative; }
+.block-edit-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+.block-edit-bar-left { display: flex; gap: 6px; }
+.btn-order { font-size: 14px; padding: 4px 10px; border-radius: 8px; border: 1.5px solid #e0e0e0; background: #fff; color: #555; cursor: pointer; font-family: inherit; }
+.btn-order:disabled { opacity: 0.25; cursor: default; }
+.btn-edit-block { font-size: 12px; padding: 5px 12px; border-radius: 8px; border: 1.5px solid #e0e0e0; background: #fff; color: #555; cursor: pointer; font-family: inherit; }
+.btn-hide-block { font-size: 12px; padding: 5px 10px; border-radius: 8px; border: 1.5px solid #e0e0e0; background: #fff; color: #999; cursor: pointer; font-family: inherit; }
+.block-hidden-notice { font-size: 12px; color: #bbb; text-align: center; padding: 8px 0; }
+
+/* ── EDIT PANEL (bottom sheet) ── */
+.edit-panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; display: none; }
+.edit-panel-overlay.open { display: block; }
+.edit-panel { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px 40px; z-index: 201; max-height: 80vh; overflow-y: auto; box-shadow: 0 -4px 24px rgba(0,0,0,0.12); }
+.edit-panel-handle { width: 40px; height: 4px; background: #e0e0e0; border-radius: 2px; margin: 0 auto 16px; }
+.edit-panel-title { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; }
+.ep-section { margin-bottom: 20px; }
+.ep-section-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; }
+.ep-variant-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 10px; background: #f8f8f8; border-radius: 10px; }
+.ep-variant-row input[type=text] { flex: 1; border: none; background: transparent; font-size: 13px; font-family: inherit; color: #1a1a1a; outline: none; }
+.ep-variant-row input[type=number] { width: 52px; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 4px 6px; font-size: 13px; font-family: inherit; text-align: center; background: #fff; }
+.ep-variant-row .ep-pts-label { font-size: 11px; color: #999; flex-shrink: 0; }
+.ep-del-btn { background: none; border: none; font-size: 16px; color: #ccc; cursor: pointer; padding: 0 2px; flex-shrink: 0; line-height: 1; }
+.ep-add-btn { width: 100%; padding: 9px; border-radius: 10px; border: 1.5px dashed #d0d0d0; background: transparent; font-size: 13px; color: #999; cursor: pointer; font-family: inherit; }
+.ep-field-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.ep-field-row label { font-size: 13px; color: #555; flex: 1; }
+.ep-field-row input[type=number] { width: 72px; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 6px 8px; font-size: 13px; font-family: inherit; text-align: center; }
+.ep-field-row input[type=text] { flex: 1; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 6px 10px; font-size: 13px; font-family: inherit; }
+.ep-save-btn { width: 100%; padding: 14px; font-size: 15px; font-weight: 600; border-radius: 12px; border: none; background: #1a1a1a; color: #fff; cursor: pointer; font-family: inherit; margin-top: 6px; }
 </style>
+
 </head>
 <body>
 <div class="app">
   <div class="tabs">
-    <button class="tab active" onclick="showTab('today')">Сегодня</button>
-    <button class="tab" onclick="showTab('stats')">Статистика</button>
-    <button class="tab" onclick="showTab('rewards')">Награды</button>
-    <button class="tab" onclick="showTab('history')">История</button>
+    <button class="tab active" id="tab-btn-today" onclick="showTab('today')">Сегодня</button>
+    <button class="tab" id="tab-btn-stats" onclick="showTab('stats')">Статистика</button>
+    <button class="tab" id="tab-btn-rewards" onclick="showTab('rewards')">Награды</button>
+    <button class="tab" id="tab-btn-history" onclick="showTab('history')">История</button>
   </div>
 
   <div id="tab-today">
     <div class="header">
-      <h1>Давид</h1>
+      <h1>Habits Creator</h1>
       <div class="date" id="header-date"></div>
       <div class="day-nav">
         <button class="day-nav-btn" onclick="shiftDay(-1)">←</button>
@@ -142,79 +175,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="score-month"><span>За месяц</span><span id="month-score">0</span></div>
 </div>
 
-<div class="section">
-  <div class="section-title">Спорт</div>
-  <div class="card">
-    <div class="row">
-      <div><div class="item-label">Тренировка</div><div class="item-sub" id="sport-sub">не отмечено · +10 очков</div></div>
-      <div class="btn-group">
-        <button class="btn" id="btn-yoga" onclick="setSport('yoga')">Йога</button>
-        <button class="btn" id="btn-pull" onclick="setSport('pull')">Турники</button>
-        <button class="btn" id="btn-basic" onclick="setSport('basic')">Запасной</button>
-      </div>
-    </div>
-    <div class="week-info"><span>Streak этой недели</span><span id="week-sport-count">0 / 5 · бонус +30</span></div>
-    <div class="week-labels"><div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div><div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div></div>
-    <div class="week-grid" id="sport-week"></div>
-  </div>
-</div>
+<button class="edit-mode-btn" id="edit-mode-btn" onclick="toggleEditMode()">✏️ Редактировать блоки</button>
 
-<div class="section">
-  <div class="section-title">Counter-Strike</div>
-  <div class="card">
-    <div class="row">
-      <div><div class="item-label">Время в КС</div><div class="item-sub">лимит 1:30 · не играл +10</div></div>
-      <div class="btn-group">
-        <button class="btn" id="btn-cs-off" onclick="setCSoff()">Не играл</button>
-        <button class="btn" id="btn-cs-start" onclick="toggleTimer()">Старт</button>
-      </div>
-    </div>
-    <div class="cs-timer">
-      <div class="timer-display" id="timer-display">0:00</div>
-      <div class="timer-badge tok" id="timer-badge">готов</div>
-    </div>
-    <div class="progress-bar"><div class="progress-fill" id="cs-progress" style="width:0%;background:#639922;"></div></div>
-    <div class="manual-row">
-      <span>Добавить вручную:</span>
-      <input type="number" id="cs-manual" min="1" max="300" placeholder="мин">
-      <button class="btn" onclick="addManualCS()" style="padding:6px 12px;">+ мин</button>
-    </div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">Трава (будние дни)</div>
-  <div class="card">
-    <div class="row">
-      <div><div class="item-label">Сегодня</div><div class="item-sub" id="weed-sub">чистый день = +20 в конце недели</div></div>
-      <div class="btn-group">
-        <button class="btn" id="btn-weed-no" onclick="setWeed('no')">Не курил</button>
-        <button class="btn" id="btn-weed-yes" onclick="setWeed('yes')">Курил</button>
-        <button class="btn" id="btn-weed-na" onclick="setWeed('na')">Выходной</button>
-      </div>
-    </div>
-    <div class="week-info"><span>Итог недели</span><span id="weed-week-pts">0 очков</span></div>
-    <div class="week-labels"><div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div><div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div></div>
-    <div class="week-grid" id="weed-week"></div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-title">Вечерняя активность</div>
-  <div class="card">
-    <div class="item-sub" style="margin-bottom:10px;">можно выбрать несколько</div>
-    <div class="evening-grid">
-      <button class="ev-btn" onclick="toggleEvening(this)">Монтаж</button>
-      <button class="ev-btn" onclick="toggleEvening(this)">Вайбкодинг</button>
-      <button class="ev-btn" onclick="toggleEvening(this)">Прогулка</button>
-      <button class="ev-btn" onclick="toggleEvening(this)">Друзья</button>
-      <button class="ev-btn" onclick="toggleEvening(this)">Звонки семье</button>
-      <button class="ev-btn" onclick="toggleEvening(this)">Чтение</button>
-      <button class="ev-btn" onclick="toggleEvening(this)">Фильм</button>
-      <button class="ev-btn" onclick="toggleEvening(this)">Другое</button>
-    </div>
-  </div>
-</div>
+<div id="blocks-container"></div>
 
 <div class="section">
   <div class="section-title">Заметка</div>
@@ -266,25 +229,58 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <button class="export-btn" onclick="exportCSV()">Экспорт в CSV</button>
   </div>
 </div>
+
+<!-- Edit Panel -->
+
+<div class="edit-panel-overlay" id="edit-overlay" onclick="closeEditPanel()"></div>
+<div class="edit-panel" id="edit-panel" style="display:none;">
+  <div class="edit-panel-handle"></div>
+  <div class="edit-panel-title" id="ep-title">Редактировать блок</div>
+  <div id="ep-body"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+<script>
+// ── Firebase stub (работает и в Claude-артефакте, и на GitHub Pages без module)
+// На реальном деплое замени этот блок на настоящий Firebase import
+var _fbReady = false;
+var _fsdb = null;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyARFzVkmek4o8qQwEi591VKX9M0isQeUmI",
-  authDomain: "david-tracker.firebaseapp.com",
-  projectId: "david-tracker",
-  storageBucket: "david-tracker.firebasestorage.app",
-  messagingSenderId: "309665468941",
-  appId: "1:309665468941:web:0eaa5b7da3b197dd17bb44"
+function initFirebase() {
+  // Попытка загрузить Firebase динамически
+  var s1 = document.createElement('script');
+  s1.type = 'module';
+  s1.textContent = `
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    const cfg = {
+      apiKey:"AIzaSyARFzVkmek4o8qQwEi591VKX9M0isQeUmI",
+      authDomain:"david-tracker.firebaseapp.com",
+      projectId:"david-tracker",
+      storageBucket:"david-tracker.firebasestorage.app",
+      messagingSenderId:"309665468941",
+      appId:"1:309665468941:web:0eaa5b7da3b197dd17bb44"
+    };
+    try {
+      const app = initializeApp(cfg);
+      const db = getFirestore(app);
+      window.__fbdb = db;
+      window.__fbDoc = doc;
+      window.__fbGetDoc = getDoc;
+      window.__fbSetDoc = setDoc;
+      window.__fbReady = true;
+      window.onFirebaseReady && window.onFirebaseReady();
+    } catch(e) { window.__fbReady = false; window.onFirebaseReady && window.onFirebaseReady(); }
+  `;
+  document.head.appendChild(s1);
+}
+
+window.onFirebaseReady = function() {
+  cloudLoad();
 };
 
-const fbApp = initializeApp(firebaseConfig);
-const fsdb = getFirestore(fbApp);
-const USER_ID = 'david';
-
+// ── Constants ──
 var REWARDS = [
   { pts: 100, name: 'Минимальная планка' },
   { pts: 200, name: 'Фильм без угрызений совести' },
@@ -294,74 +290,71 @@ var REWARDS = [
 ];
 var MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 var DAYS_RU = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-var SPORT_LABELS = { yoga: 'Йога · +10', pull: 'Турники · +10', basic: 'Запасной · +10' };
 
+// ── Default block config ──
+var DEFAULT_BLOCKS = [
+  {
+    id: 'sport',
+    title: 'Спорт',
+    subtitle: 'Тренировка',
+    type: 'sport',
+    hidden: false,
+    variants: [
+      { key: 'yoga', label: 'Йога', pts: 10 },
+      { key: 'pull', label: 'Турники', pts: 10 },
+      { key: 'basic', label: 'Запасной', pts: 10 }
+    ],
+    weekBonus: { target: 5, pts: 30 }
+  },
+  {
+    id: 'cs',
+    title: 'Counter-Strike',
+    subtitle: 'Время в КС',
+    type: 'cs',
+    hidden: false,
+    limitMinutes: 90,
+    ptsOff: 10,
+    ptsOk: 5,
+    ptsOver: -10
+  },
+  {
+    id: 'weed',
+    title: 'Трава (будние дни)',
+    subtitle: 'Сегодня',
+    type: 'weed',
+    hidden: false,
+    ptsClean: 20,
+    ptsDirty: -10
+  },
+  {
+    id: 'evening',
+    title: 'Вечерняя активность',
+    type: 'multi',
+    hidden: false,
+    variants: [
+      { label: 'Монтаж' }, { label: 'Вайбкодинг' }, { label: 'Прогулка' }, { label: 'Друзья' },
+      { label: 'Звонки семье' }, { label: 'Чтение' }, { label: 'Фильм' }, { label: 'Другое' }
+    ]
+  }
+];
+
+// ── State ──
 var db = {
   monthScore: 0, monthKey: '',
   history: [],
-  weekSport: {}, weekWeed: {}, weekKey: '', weekBonusGiven: false
+  weekSport: {}, weekWeed: {}, weekKey: '', weekBonusGiven: false,
+  blocks: null // null = use defaults
 };
 
 var day = { sport: null, cs: 'none', csSeconds: 0, csRunning: false, evening: [], weed: null, note: '' };
 var dayOffset = 0;
 var timerInt = null;
+var editMode = false;
+var editingBlockId = null;
 
-function setSyncStatus(status, msg) {
-  var el = document.getElementById('sync-status');
-  el.textContent = msg;
-  el.className = 'sync-status sync-' + status;
-}
-
-async function cloudLoad() {
-  setSyncStatus('pending', '↻ загрузка...');
-  try {
-    var ref = doc(fsdb, 'trackers', USER_ID);
-    var snap = await getDoc(ref);
-    if (snap.exists()) {
-      var data = snap.data();
-      db = Object.assign(db, data);
-      if (!db.history) db.history = [];
-      if (!db.weekSport) db.weekSport = {};
-      if (!db.weekWeed) db.weekWeed = {};
-    }
-    var mk = getMonthKey();
-    if (db.monthKey !== mk) { db.monthScore = 0; db.monthKey = mk; }
-    var wk = getWeekKey();
-    if (db.weekKey !== wk) { db.weekSport = {}; db.weekWeed = {}; db.weekKey = wk; db.weekBonusGiven = false; }
-    localSave();
-    setSyncStatus('ok', '✓ данные загружены');
-    setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
-  } catch(e) {
-    localLoad();
-    setSyncStatus('err', '⚠ офлайн — данные локальные');
-  }
-  updateScores();
-  updateSportWeek();
-  updateWeedWeek();
-  loadDay(0);
-}
-
-async function cloudSave() {
-  localSave();
-  setSyncStatus('pending', '↻ сохранение...');
-  try {
-    var ref = doc(fsdb, 'trackers', USER_ID);
-    await setDoc(ref, db);
-    setSyncStatus('ok', '✓ сохранено в облако');
-    setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
-  } catch(e) {
-    setSyncStatus('err', '⚠ сохранено локально (нет сети)');
-  }
-}
-
-function localSave() { try { localStorage.setItem('dtracker6', JSON.stringify(db)); } catch(e) {} }
-function localLoad() {
-  try { var s = localStorage.getItem('dtracker6'); if (s) db = Object.assign(db, JSON.parse(s)); } catch(e) {}
-  var mk = getMonthKey();
-  if (db.monthKey !== mk) { db.monthScore = 0; db.monthKey = mk; }
-  var wk = getWeekKey();
-  if (db.weekKey !== wk) { db.weekSport = {}; db.weekWeed = {}; db.weekKey = wk; db.weekBonusGiven = false; }
-}
+// ── Helpers ──
+function getBlocks() { return db.blocks || JSON.parse(JSON.stringify(DEFAULT_BLOCKS)); }
+function setBlocks(b) { db.blocks = b; }
 
 function getOffsetDate(off) { var d = new Date(); d.setDate(d.getDate() + off); return d; }
 function getDateStr(off) { return getOffsetDate(off).toISOString().split('T')[0]; }
@@ -374,19 +367,94 @@ function getWeekKey() {
 function getDOW(off) { var d = getOffsetDate(off); var wd = d.getDay(); return wd === 0 ? 6 : wd - 1; }
 function fmtDate(str) { var p = str.split('-'); return parseInt(p[2]) + ' ' + MONTHS[parseInt(p[1])-1]; }
 
-function calcScore() {
-  var pts = 0;
-  if (day.sport) pts += 10;
-  if (day.cs === 'off') pts += 10;
-  else if (day.cs === 'ok') pts += 5;
-  else if (day.cs === 'over') pts -= 10;
-  return pts;
+function setSyncStatus(status, msg) {
+  var el = document.getElementById('sync-status');
+  el.textContent = msg;
+  el.className = 'sync-status sync-' + status;
 }
 
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 2600);
+// ── Firebase / Storage ──
+async function cloudLoad() {
+  setSyncStatus('pending', '↻ загрузка...');
+  if (window.__fbReady && window.__fbdb) {
+    try {
+      var ref = window.__fbDoc(window.__fbdb, 'trackers', 'david');
+      var snap = await window.__fbGetDoc(ref);
+      if (snap.exists()) {
+        var data = snap.data();
+        db = Object.assign(db, data);
+        if (!db.history) db.history = [];
+        if (!db.weekSport) db.weekSport = {};
+        if (!db.weekWeed) db.weekWeed = {};
+      }
+      checkRollover();
+      localSave();
+      setSyncStatus('ok', '✓ данные загружены');
+      setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
+    } catch(e) {
+      localLoad();
+      setSyncStatus('err', '⚠ офлайн — данные локальные');
+    }
+  } else {
+    localLoad();
+    setSyncStatus('err', '⚠ локальный режим (Firebase недоступен)');
+  }
+  updateScores(); renderBlocks(); updateSportWeek(); updateWeedWeek(); loadDay(0);
+}
+
+async function cloudSave() {
+  localSave();
+  if (window.__fbReady && window.__fbdb) {
+    setSyncStatus('pending', '↻ сохранение...');
+    try {
+      var ref = window.__fbDoc(window.__fbdb, 'trackers', 'david');
+      await window.__fbSetDoc(ref, db);
+      setSyncStatus('ok', '✓ сохранено в облако');
+      setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
+    } catch(e) {
+      setSyncStatus('err', '⚠ сохранено локально (нет сети)');
+    }
+  } else {
+    setSyncStatus('ok', '✓ сохранено локально');
+    setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
+  }
+}
+
+function checkRollover() {
+  var mk = getMonthKey();
+  if (db.monthKey !== mk) { db.monthScore = 0; db.monthKey = mk; }
+  var wk = getWeekKey();
+  if (db.weekKey !== wk) { db.weekSport = {}; db.weekWeed = {}; db.weekKey = wk; db.weekBonusGiven = false; }
+}
+
+function localSave() { try { localStorage.setItem('habits_creator_v1', JSON.stringify(db)); } catch(e) {} }
+function localLoad() {
+  try {
+    var s = localStorage.getItem('habits_creator_v1');
+    // fallback: try old key
+    if (!s) s = localStorage.getItem('dtracker6');
+    if (s) db = Object.assign(db, JSON.parse(s));
+  } catch(e) {}
+  checkRollover();
+}
+
+// ── Score ──
+function calcScore() {
+  var pts = 0;
+  var blocks = getBlocks();
+  blocks.forEach(function(b) {
+    if (b.hidden) return;
+    if (b.type === 'sport' && day.sport) {
+      var v = b.variants.find(function(x){return x.key===day.sport;});
+      if (v) pts += v.pts;
+    }
+    if (b.type === 'cs') {
+      if (day.cs === 'off') pts += (b.ptsOff || 10);
+      else if (day.cs === 'ok') pts += (b.ptsOk || 5);
+      else if (day.cs === 'over') pts += (b.ptsOver || -10);
+    }
+  });
+  return pts;
 }
 
 function updateScores() {
@@ -395,6 +463,14 @@ function updateScores() {
   var rs = document.getElementById('rewards-score'); if (rs) rs.textContent = db.monthScore;
 }
 
+// ── Toast ──
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2600);
+}
+
+// ── Header ──
 function updateHeader() {
   var d = new Date();
   document.getElementById('header-date').textContent = DAYS_RU[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
@@ -411,22 +487,160 @@ function updateDayNav() {
   document.getElementById('btn-day-fwd').disabled = dayOffset === 0;
 }
 
-function updateSportBtns() {
-  ['yoga','pull','basic'].forEach(function(t) { document.getElementById('btn-'+t).className = 'btn' + (day.sport === t ? ' ag' : ''); });
-  document.getElementById('sport-sub').textContent = day.sport ? SPORT_LABELS[day.sport] : 'не отмечено · +10 очков';
+// ── Blocks rendering ──
+function renderBlocks() {
+  var container = document.getElementById('blocks-container');
+  if (!container) return;
+  var blocks = getBlocks();
+  var html = '';
+  blocks.forEach(function(b, idx) {
+    var editBar = '';
+    if (editMode) {
+      editBar = '<div class="block-edit-bar">' +
+        '<div class="block-edit-bar-left">' +
+        '<button class="btn-order" onclick="moveBlock(' + idx + ',-1)" ' + (idx===0?'disabled':'') + '>↑</button>' +
+        '<button class="btn-order" onclick="moveBlock(' + idx + ',1)" ' + (idx===blocks.length-1?'disabled':'') + '>↓</button>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;">' +
+        '<button class="btn-edit-block" onclick="openEditPanel(\'' + b.id + '\')">Изменить</button>' +
+        '<button class="btn-hide-block" onclick="toggleHideBlock(\'' + b.id + '\')">' + (b.hidden ? '👁 Показать' : '🙈 Скрыть') + '</button>' +
+        '</div></div>';
+    }
+
+    if (b.hidden && !editMode) return; // skip hidden when not editing
+
+    var cardClass = 'card' + (editMode ? ' edit-active' : '');
+    var inner = '';
+
+    if (b.hidden && editMode) {
+      inner = '<div class="block-hidden-notice">Блок скрыт (данные сохраняются)</div>';
+    } else if (b.type === 'sport') {
+      inner = renderSportBlock(b);
+    } else if (b.type === 'cs') {
+      inner = renderCSBlock(b);
+    } else if (b.type === 'weed') {
+      inner = renderWeedBlock(b);
+    } else if (b.type === 'multi') {
+      inner = renderMultiBlock(b);
+    }
+
+    html += '<div class="section" id="section-' + b.id + '">' +
+      '<div class="section-title">' + escHtml(b.title) + '</div>' +
+      '<div class="' + cardClass + '">' + editBar + inner + '</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+  // re-attach state
+  updateSportBtns(); updateCSBtns(); updateTimer(); updateEveningBtns(); updateWeedBtns();
 }
 
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderSportBlock(b) {
+  var btns = b.variants.map(function(v) {
+    return '<button class="btn" id="btn-sport-' + v.key + '" onclick="setSport(\'' + v.key + '\')">' + escHtml(v.label) + '</button>';
+  }).join('');
+  return '<div class="row"><div><div class="item-label">' + escHtml(b.subtitle||'Тренировка') + '</div>' +
+    '<div class="item-sub" id="sport-sub">не отмечено · +10 очков</div></div>' +
+    '<div class="btn-group">' + btns + '</div></div>' +
+    '<div class="week-info"><span>Streak этой недели</span><span id="week-sport-count">0 / ' + (b.weekBonus?b.weekBonus.target:5) + ' · бонус +' + (b.weekBonus?b.weekBonus.pts:30) + '</span></div>' +
+    '<div class="week-labels">' + ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(function(d){return '<div class="week-label">'+d+'</div>';}).join('') + '</div>' +
+    '<div class="week-grid" id="sport-week"></div>';
+}
+
+function renderCSBlock(b) {
+  return '<div class="row"><div><div class="item-label">Время в КС</div>' +
+    '<div class="item-sub">лимит ' + Math.floor((b.limitMinutes||90)/60) + ':' + String((b.limitMinutes||90)%60).padStart(2,'0') + ' · не играл +' + (b.ptsOff||10) + '</div></div>' +
+    '<div class="btn-group">' +
+    '<button class="btn" id="btn-cs-off" onclick="setCSoff()">Не играл</button>' +
+    '<button class="btn" id="btn-cs-start" onclick="toggleTimer()">Старт</button>' +
+    '</div></div>' +
+    '<div class="cs-timer"><div class="timer-display" id="timer-display">0:00</div><div class="timer-badge tok" id="timer-badge">готов</div></div>' +
+    '<div class="progress-bar"><div class="progress-fill" id="cs-progress" style="width:0%;background:#639922;"></div></div>' +
+    '<div class="manual-row"><span>Добавить вручную:</span>' +
+    '<input type="number" id="cs-manual" min="1" max="300" placeholder="мин">' +
+    '<button class="btn" onclick="addManualCS()" style="padding:6px 12px;">+ мин</button></div>';
+}
+
+function renderWeedBlock(b) {
+  return '<div class="row"><div><div class="item-label">' + escHtml(b.subtitle||'Сегодня') + '</div>' +
+    '<div class="item-sub" id="weed-sub">чистый день = +' + (b.ptsClean||20) + ' в конце недели</div></div>' +
+    '<div class="btn-group">' +
+    '<button class="btn" id="btn-weed-no" onclick="setWeed(\'no\')">Не курил</button>' +
+    '<button class="btn" id="btn-weed-yes" onclick="setWeed(\'yes\')">Курил</button>' +
+    '<button class="btn" id="btn-weed-na" onclick="setWeed(\'na\')">Выходной</button>' +
+    '</div></div>' +
+    '<div class="week-info"><span>Итог недели</span><span id="weed-week-pts">0 очков</span></div>' +
+    '<div class="week-labels">' + ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(function(d){return '<div class="week-label">'+d+'</div>';}).join('') + '</div>' +
+    '<div class="week-grid" id="weed-week"></div>';
+}
+
+function renderMultiBlock(b) {
+  var btns = b.variants.map(function(v) {
+    return '<button class="ev-btn" onclick="toggleEvening(this)">' + escHtml(v.label) + '</button>';
+  }).join('');
+  return '<div class="item-sub" style="margin-bottom:10px;">можно выбрать несколько</div>' +
+    '<div class="evening-grid">' + btns + '</div>';
+}
+
+// ── Sport ──
+function updateSportBtns() {
+  var blocks = getBlocks();
+  var sb = blocks.find(function(b){return b.type==='sport';});
+  if (!sb) return;
+  sb.variants.forEach(function(v) {
+    var el = document.getElementById('btn-sport-' + v.key); if (!el) return;
+    el.className = 'btn' + (day.sport === v.key ? ' ag' : '');
+  });
+  var sub = document.getElementById('sport-sub'); if (!sub) return;
+  if (day.sport) {
+    var v = sb.variants.find(function(x){return x.key===day.sport;});
+    sub.textContent = (v ? v.label : day.sport) + ' · +' + (v ? v.pts : 10) + ' очков';
+  } else {
+    sub.textContent = 'не отмечено · +10 очков';
+  }
+}
+
+window.setSport = function(type) {
+  day.sport = day.sport === type ? null : type;
+  updateSportBtns(); updateScores();
+};
+
+function updateSportWeek() {
+  var grid = document.getElementById('sport-week'); if (!grid) return;
+  var blocks = getBlocks();
+  var sb = blocks.find(function(b){return b.type==='sport';});
+  var target = sb && sb.weekBonus ? sb.weekBonus.target : 5;
+  var bonus = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
+  grid.innerHTML = ''; var count = 0;
+  for (var i = 0; i < 7; i++) {
+    var d = document.createElement('div');
+    if (db.weekSport['d'+i]) { d.className = 'wd done'; d.textContent = '+'; count++; }
+    else { d.className = 'wd empty'; d.textContent = '·'; }
+    grid.appendChild(d);
+  }
+  var wsc = document.getElementById('week-sport-count');
+  if (wsc) wsc.textContent = count + ' / ' + target + ' · бонус +' + bonus;
+}
+
+// ── CS ──
 function updateCSBtns() {
-  document.getElementById('btn-cs-off').className = 'btn' + (day.cs === 'off' ? ' ag' : '');
-  var sb = document.getElementById('btn-cs-start');
+  var el = document.getElementById('btn-cs-off'); if (!el) return;
+  el.className = 'btn' + (day.cs === 'off' ? ' ag' : '');
+  var sb = document.getElementById('btn-cs-start'); if (!sb) return;
   sb.textContent = day.csRunning ? 'Пауза' : (day.csSeconds > 0 ? 'Продолжить' : 'Старт');
 }
 
 function updateTimer() {
+  var td = document.getElementById('timer-display'); if (!td) return;
   var m = Math.floor(day.csSeconds / 60); var s = day.csSeconds % 60;
-  document.getElementById('timer-display').textContent = m + ':' + String(s).padStart(2,'0');
-  var limit = 90 * 60; var pct = Math.min(100, Math.round(day.csSeconds / limit * 100));
+  td.textContent = m + ':' + String(s).padStart(2,'0');
+  var blocks = getBlocks();
+  var cb = blocks.find(function(b){return b.type==='cs';});
+  var limit = (cb ? (cb.limitMinutes||90) : 90) * 60;
+  var pct = Math.min(100, Math.round(day.csSeconds / limit * 100));
   var bar = document.getElementById('cs-progress'); var badge = document.getElementById('timer-badge');
+  if (!bar || !badge) return;
   if (day.csSeconds === 0) {
     bar.style.width = '0%'; bar.style.background = '#639922'; badge.textContent = 'готов'; badge.className = 'timer-badge tok';
   } else if (day.csSeconds <= limit) {
@@ -441,42 +655,60 @@ function updateTimer() {
   updateScores();
 }
 
-function updateEveningBtns() {
-  document.querySelectorAll('.ev-btn').forEach(function(b) {
-    b.className = day.evening.indexOf(b.textContent.trim()) !== -1 ? 'ev-btn sel' : 'ev-btn';
-  });
-}
+window.setCSoff = function() {
+  clearInterval(timerInt); timerInt = null;
+  day.cs = 'off'; day.csSeconds = 0; day.csRunning = false;
+  updateCSBtns(); updateTimer(); updateScores();
+};
+window.toggleTimer = function() {
+  var el = document.getElementById('btn-cs-off'); if (el) el.className = 'btn';
+  if (day.cs === 'off') day.cs = 'none';
+  if (day.csRunning) { clearInterval(timerInt); timerInt = null; day.csRunning = false; }
+  else { day.csRunning = true; timerInt = setInterval(function() { day.csSeconds++; updateTimer(); }, 1000); }
+  updateCSBtns();
+};
+window.addManualCS = function() {
+  var inp = document.getElementById('cs-manual'); if (!inp) return;
+  var mins = parseInt(inp.value);
+  if (!mins || mins < 1) return;
+  if (day.cs === 'off') day.cs = 'none';
+  var el = document.getElementById('btn-cs-off'); if (el) el.className = 'btn';
+  day.csSeconds += mins * 60; inp.value = '';
+  updateTimer(); updateCSBtns();
+};
 
+// ── Weed ──
 function updateWeedBtns() {
+  var blocks = getBlocks();
+  var wb = blocks.find(function(b){return b.type==='weed';});
+  var ptsClean = wb ? (wb.ptsClean||20) : 20;
   ['no','yes','na'].forEach(function(v) {
-    var b = document.getElementById('btn-weed-'+v);
+    var b = document.getElementById('btn-weed-'+v); if (!b) return;
     b.className = 'btn' + (day.weed === v ? (v==='no'?' ag':v==='yes'?' ar':' aa') : '');
   });
-  var subs = { no:'+20 в конце недели', yes:'штраф в конце недели', na:'выходной, не считается' };
-  document.getElementById('weed-sub').textContent = subs[day.weed] || 'чистый день = +20 в конце недели';
+  var sub = document.getElementById('weed-sub'); if (!sub) return;
+  var subs = { no:'+'+ptsClean+' в конце недели', yes:'штраф в конце недели', na:'выходной, не считается' };
+  sub.textContent = subs[day.weed] || ('чистый день = +'+ptsClean+' в конце недели');
 }
-
-function updateSportWeek() {
-  var grid = document.getElementById('sport-week'); if (!grid) return;
-  grid.innerHTML = ''; var count = 0;
-  for (var i = 0; i < 7; i++) {
-    var d = document.createElement('div');
-    if (db.weekSport['d'+i]) { d.className = 'wd done'; d.textContent = '+'; count++; }
-    else { d.className = 'wd empty'; d.textContent = '·'; }
-    grid.appendChild(d);
-  }
-  document.getElementById('week-sport-count').textContent = count + ' / 5 · бонус +30';
-}
-
+window.setWeed = function(val) {
+  day.weed = day.weed === val ? null : val;
+  var d = getDOW(dayOffset);
+  if (day.weed) db.weekWeed['d'+d] = day.weed; else delete db.weekWeed['d'+d];
+  updateWeedBtns(); updateWeedWeek();
+};
 function calcWeedPts() {
+  var blocks = getBlocks();
+  var wb = blocks.find(function(b){return b.type==='weed';});
+  var ptsClean = wb ? (wb.ptsClean||20) : 20;
+  var ptsDirty = wb ? (wb.ptsDirty||-10) : -10;
   var pts = 0, misses = 0;
   for (var i = 0; i < 5; i++) {
     var v = db.weekWeed['d'+i];
-    if (v === 'no') pts += 20; else if (v === 'yes') { misses++; pts -= 10 + Math.max(0,(misses-1)*5); }
+    if (v === 'no') pts += ptsClean;
+    else if (v === 'yes') { misses++; pts += ptsDirty - Math.max(0,(misses-1)*5); }
   }
   return pts;
 }
-
 function updateWeedWeek() {
   var grid = document.getElementById('weed-week'); if (!grid) return;
   grid.innerHTML = '';
@@ -487,9 +719,24 @@ function updateWeedWeek() {
     else { d.className = 'wd empty'; d.textContent = '·'; }
     grid.appendChild(d);
   }
-  document.getElementById('weed-week-pts').textContent = calcWeedPts() + ' очков';
+  var wp = document.getElementById('weed-week-pts');
+  if (wp) wp.textContent = calcWeedPts() + ' очков';
 }
 
+// ── Evening ──
+function updateEveningBtns() {
+  document.querySelectorAll('.ev-btn').forEach(function(b) {
+    b.className = day.evening.indexOf(b.textContent.trim()) !== -1 ? 'ev-btn sel' : 'ev-btn';
+  });
+}
+window.toggleEvening = function(el) {
+  var activity = el.textContent.trim();
+  var idx = day.evening.indexOf(activity);
+  if (idx === -1) day.evening.push(activity); else day.evening.splice(idx, 1);
+  updateEveningBtns();
+};
+
+// ── Load day ──
 function loadDay(off) {
   clearInterval(timerInt); timerInt = null;
   var entry = null;
@@ -501,57 +748,25 @@ function loadDay(off) {
   day.evening = entry ? (Array.isArray(entry.evening) ? entry.evening : (entry.evening ? [entry.evening] : [])) : [];
   day.weed = entry ? entry.weed : null;
   day.note = entry ? (entry.note || '') : '';
-  document.getElementById('day-note').value = day.note;
+  var dn = document.getElementById('day-note'); if (dn) dn.value = day.note;
   updateSportBtns(); updateCSBtns(); updateTimer(); updateEveningBtns(); updateWeedBtns(); updateScores();
 }
 
-window.shiftDay = function(dir) {
-  var next = dayOffset + dir; if (next > 0) return;
-  dayOffset = next; loadDay(dayOffset); updateDayNav();
-};
-window.setSport = function(type) { day.sport = day.sport === type ? null : type; updateSportBtns(); updateScores(); };
-window.setCSoff = function() {
-  clearInterval(timerInt); timerInt = null;
-  day.cs = 'off'; day.csSeconds = 0; day.csRunning = false;
-  updateCSBtns(); updateTimer(); updateScores();
-};
-window.toggleTimer = function() {
-  document.getElementById('btn-cs-off').className = 'btn';
-  if (day.cs === 'off') day.cs = 'none';
-  if (day.csRunning) { clearInterval(timerInt); timerInt = null; day.csRunning = false; }
-  else { day.csRunning = true; timerInt = setInterval(function() { day.csSeconds++; updateTimer(); }, 1000); }
-  updateCSBtns();
-};
-window.addManualCS = function() {
-  var inp = document.getElementById('cs-manual'); var mins = parseInt(inp.value);
-  if (!mins || mins < 1) return;
-  if (day.cs === 'off') day.cs = 'none';
-  document.getElementById('btn-cs-off').className = 'btn';
-  day.csSeconds += mins * 60; inp.value = '';
-  updateTimer(); updateCSBtns();
-};
-window.toggleEvening = function(el) {
-  var activity = el.textContent.trim();
-  var idx = day.evening.indexOf(activity);
-  if (idx === -1) day.evening.push(activity); else day.evening.splice(idx, 1);
-  updateEveningBtns();
-};
-window.setWeed = function(val) {
-  day.weed = day.weed === val ? null : val;
-  var d = getDOW(dayOffset);
-  if (day.weed) db.weekWeed['d'+d] = day.weed; else delete db.weekWeed['d'+d];
-  updateWeedBtns(); updateWeedWeek();
-};
+// ── Save day ──
 window.saveDay = async function() {
-  day.note = document.getElementById('day-note').value.trim();
+  var dn = document.getElementById('day-note'); day.note = dn ? dn.value.trim() : '';
   var pts = calcScore();
   var today = getDateStr(dayOffset);
   var d = getDOW(dayOffset);
   if (day.sport) db.weekSport['d'+d] = true;
   if (day.weed) db.weekWeed['d'+d] = day.weed;
   var sportCount = Object.values(db.weekSport).filter(Boolean).length;
+  var blocks = getBlocks();
+  var sb = blocks.find(function(b){return b.type==='sport';});
+  var bonusTarget = sb && sb.weekBonus ? sb.weekBonus.target : 5;
+  var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
   var bonus = 0;
-  if (sportCount >= 5 && !db.weekBonusGiven) { bonus = 30; db.weekBonusGiven = true; }
+  if (sportCount >= bonusTarget && !db.weekBonusGiven) { bonus = bonusPts; db.weekBonusGiven = true; }
   var entry = { date: today, sport: day.sport, cs: day.cs, csSeconds: day.csSeconds, evening: day.evening.slice(), weed: day.weed, note: day.note, pts: pts };
   var idx = -1;
   for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === today) { idx = i; break; } }
@@ -560,9 +775,206 @@ window.saveDay = async function() {
   if (bonus > 0) db.monthScore += bonus;
   updateScores(); updateSportWeek(); updateWeedWeek();
   await cloudSave();
-  showToast(bonus > 0 ? 'Сохранено · +' + pts + ' оч. + бонус +30!' : 'Сохранено · ' + (pts >= 0 ? '+' : '') + pts + ' очков');
+  showToast(bonus > 0 ? 'Сохранено · +' + pts + ' оч. + бонус +' + bonusPts + '!' : 'Сохранено · ' + (pts >= 0 ? '+' : '') + pts + ' очков');
 };
 
+// ── Nav ──
+window.shiftDay = function(dir) {
+  var next = dayOffset + dir; if (next > 0) return;
+  dayOffset = next; loadDay(dayOffset); updateDayNav();
+};
+
+// ── Tabs ──
+window.showTab = function(tab) {
+  ['today','stats','rewards','history'].forEach(function(t){
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  ['today','stats','rewards','history'].forEach(function(t){
+    var el = document.getElementById('tab-btn-'+t);
+    if (el) el.className = t===tab ? 'tab active' : 'tab';
+  });
+  if (tab==='rewards') renderRewards();
+  if (tab==='history') renderHistory();
+  if (tab==='stats') renderStats();
+};
+
+// ── Edit mode ──
+window.toggleEditMode = function() {
+  editMode = !editMode;
+  var btn = document.getElementById('edit-mode-btn');
+  btn.className = editMode ? 'edit-mode-btn active' : 'edit-mode-btn';
+  btn.textContent = editMode ? '✓ Готово' : '✏️ Редактировать блоки';
+  renderBlocks();
+};
+
+window.moveBlock = function(idx, dir) {
+  var blocks = getBlocks();
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= blocks.length) return;
+  var tmp = blocks[idx]; blocks[idx] = blocks[newIdx]; blocks[newIdx] = tmp;
+  setBlocks(blocks);
+  renderBlocks();
+};
+
+window.toggleHideBlock = function(id) {
+  var blocks = getBlocks();
+  var b = blocks.find(function(x){return x.id===id;}); if (!b) return;
+  b.hidden = !b.hidden;
+  setBlocks(blocks);
+  renderBlocks();
+  showToast(b.hidden ? 'Блок скрыт' : 'Блок показан');
+};
+
+// ── Edit panel ──
+window.openEditPanel = function(id) {
+  var blocks = getBlocks();
+  var b = blocks.find(function(x){return x.id===id;}); if (!b) return;
+  editingBlockId = id;
+  var panel = document.getElementById('edit-panel');
+  var overlay = document.getElementById('edit-overlay');
+  document.getElementById('ep-title').textContent = 'Редактировать: ' + b.title;
+  document.getElementById('ep-body').innerHTML = buildEditPanelHTML(b);
+  panel.style.display = 'block';
+  overlay.classList.add('open');
+};
+
+window.closeEditPanel = function() {
+  document.getElementById('edit-panel').style.display = 'none';
+  document.getElementById('edit-overlay').classList.remove('open');
+  editingBlockId = null;
+};
+
+function buildEditPanelHTML(b) {
+  var html = '';
+
+  // Block title
+  html += '<div class="ep-section"><div class="ep-section-label">Название блока</div>' +
+    '<div class="ep-field-row"><input type="text" id="ep-block-title" value="' + escHtml(b.title) + '"></div></div>';
+
+  if (b.type === 'sport') {
+    html += '<div class="ep-section"><div class="ep-section-label">Варианты тренировок</div>' +
+      '<div id="ep-variants-list">';
+    b.variants.forEach(function(v, i) {
+      html += '<div class="ep-variant-row" id="ep-var-'+i+'">' +
+        '<input type="text" value="' + escHtml(v.label) + '" placeholder="Название" id="ep-var-label-'+i+'">' +
+        '<span class="ep-pts-label">очки:</span>' +
+        '<input type="number" value="' + v.pts + '" min="-100" max="100" id="ep-var-pts-'+i+'">' +
+        '<button class="ep-del-btn" onclick="removeVariant('+i+')">✕</button></div>';
+    });
+    html += '</div>' +
+      '<button class="ep-add-btn" onclick="addVariant()">+ Добавить вариант</button></div>';
+
+    html += '<div class="ep-section"><div class="ep-section-label">Недельный бонус</div>' +
+      '<div class="ep-field-row"><label>Дней для бонуса</label>' +
+      '<input type="number" value="' + (b.weekBonus?b.weekBonus.target:5) + '" min="1" max="7" id="ep-bonus-target"></div>' +
+      '<div class="ep-field-row"><label>Очков за бонус</label>' +
+      '<input type="number" value="' + (b.weekBonus?b.weekBonus.pts:30) + '" min="0" max="200" id="ep-bonus-pts"></div></div>';
+  }
+
+  if (b.type === 'cs') {
+    html += '<div class="ep-section"><div class="ep-section-label">Параметры</div>' +
+      '<div class="ep-field-row"><label>Лимит (минут)</label><input type="number" value="'+(b.limitMinutes||90)+'" min="1" max="600" id="ep-cs-limit"></div>' +
+      '<div class="ep-field-row"><label>Не играл (очки)</label><input type="number" value="'+(b.ptsOff||10)+'" min="-100" max="100" id="ep-cs-off"></div>' +
+      '<div class="ep-field-row"><label>В лимите (очки)</label><input type="number" value="'+(b.ptsOk||5)+'" min="-100" max="100" id="ep-cs-ok"></div>' +
+      '<div class="ep-field-row"><label>Перебор (очки)</label><input type="number" value="'+(b.ptsOver||-10)+'" min="-100" max="100" id="ep-cs-over"></div></div>';
+  }
+
+  if (b.type === 'weed') {
+    html += '<div class="ep-section"><div class="ep-section-label">Параметры</div>' +
+      '<div class="ep-field-row"><label>Не курил (очки/день)</label><input type="number" value="'+(b.ptsClean||20)+'" min="0" max="200" id="ep-weed-clean"></div>' +
+      '<div class="ep-field-row"><label>Курил (штраф)</label><input type="number" value="'+(b.ptsDirty||-10)+'" min="-200" max="0" id="ep-weed-dirty"></div></div>';
+  }
+
+  if (b.type === 'multi') {
+    html += '<div class="ep-section"><div class="ep-section-label">Варианты активностей</div>' +
+      '<div id="ep-variants-list">';
+    b.variants.forEach(function(v, i) {
+      html += '<div class="ep-variant-row" id="ep-var-'+i+'">' +
+        '<input type="text" value="' + escHtml(v.label) + '" placeholder="Название" id="ep-var-label-'+i+'">' +
+        '<button class="ep-del-btn" onclick="removeVariant('+i+')">✕</button></div>';
+    });
+    html += '</div><button class="ep-add-btn" onclick="addVariant()">+ Добавить вариант</button></div>';
+  }
+
+  html += '<button class="ep-save-btn" onclick="saveEditPanel()">Сохранить</button>';
+  return html;
+}
+
+window.addVariant = function() {
+  var blocks = getBlocks();
+  var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
+  // Read current values first
+  saveVariantsToBlock(b);
+  b.variants.push(b.type === 'sport' ? { key: 'v'+Date.now(), label: '', pts: 10 } : { label: '' });
+  setBlocks(blocks);
+  document.getElementById('ep-body').innerHTML = buildEditPanelHTML(b);
+};
+
+window.removeVariant = function(idx) {
+  var blocks = getBlocks();
+  var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
+  saveVariantsToBlock(b);
+  b.variants.splice(idx, 1);
+  setBlocks(blocks);
+  document.getElementById('ep-body').innerHTML = buildEditPanelHTML(b);
+};
+
+function saveVariantsToBlock(b) {
+  if (!b.variants) return;
+  b.variants.forEach(function(v, i) {
+    var labelEl = document.getElementById('ep-var-label-'+i);
+    var ptsEl = document.getElementById('ep-var-pts-'+i);
+    if (labelEl) v.label = labelEl.value;
+    if (ptsEl) v.pts = parseInt(ptsEl.value) || 0;
+  });
+}
+
+window.saveEditPanel = function() {
+  var blocks = getBlocks();
+  var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
+
+  var titleEl = document.getElementById('ep-block-title');
+  if (titleEl) b.title = titleEl.value.trim() || b.title;
+
+  if (b.type === 'sport') {
+    saveVariantsToBlock(b);
+    var bt = document.getElementById('ep-bonus-target');
+    var bp = document.getElementById('ep-bonus-pts');
+    if (!b.weekBonus) b.weekBonus = {};
+    if (bt) b.weekBonus.target = parseInt(bt.value) || 5;
+    if (bp) b.weekBonus.pts = parseInt(bp.value) || 30;
+  }
+
+  if (b.type === 'cs') {
+    var lim = document.getElementById('ep-cs-limit');
+    var off = document.getElementById('ep-cs-off');
+    var ok = document.getElementById('ep-cs-ok');
+    var over = document.getElementById('ep-cs-over');
+    if (lim) b.limitMinutes = parseInt(lim.value) || 90;
+    if (off) b.ptsOff = parseInt(off.value) || 10;
+    if (ok) b.ptsOk = parseInt(ok.value) || 5;
+    if (over) b.ptsOver = parseInt(over.value) || -10;
+  }
+
+  if (b.type === 'weed') {
+    var clean = document.getElementById('ep-weed-clean');
+    var dirty = document.getElementById('ep-weed-dirty');
+    if (clean) b.ptsClean = parseInt(clean.value) || 20;
+    if (dirty) b.ptsDirty = parseInt(dirty.value) || -10;
+  }
+
+  if (b.type === 'multi') {
+    saveVariantsToBlock(b);
+  }
+
+  setBlocks(blocks);
+  closeEditPanel();
+  renderBlocks();
+  cloudSave();
+  showToast('Блок обновлён');
+};
+
+// ── Rewards ──
 function renderRewards() {
   var list = document.getElementById('rewards-list'); if (!list) return;
   list.innerHTML = REWARDS.map(function(r) {
@@ -571,16 +983,19 @@ function renderRewards() {
   }).join('');
 }
 
+// ── History ──
 function renderHistory() {
   var list = document.getElementById('history-list'); if (!list) return;
   if (!db.history.length) { list.innerHTML = '<div class="empty-state">Нет записей</div>'; return; }
-  var SL = { yoga:'Йога', pull:'Турники', basic:'Запасной' };
+  var SL = {}; var blocks = getBlocks();
+  var sb = blocks.find(function(b){return b.type==='sport';});
+  if (sb) sb.variants.forEach(function(v){ SL[v.key] = v.label; });
   var CL = { off:'нет', ok:'лимит', over:'перебор', none:'—' };
   var rows = db.history.slice(-30).reverse();
   list.innerHTML = rows.map(function(h) {
     var ev = Array.isArray(h.evening) ? h.evening.join(', ') : (h.evening || '—');
-    var noteHtml = h.note ? '<div class="history-note">' + h.note + '</div>' : '';
-    return '<div class="history-row"><div class="history-top"><div><div class="history-date">'+fmtDate(h.date)+'</div><div class="history-detail">'+(SL[h.sport]||'—')+' · КС: '+(CL[h.cs]||'—')+'</div><div class="history-detail">'+ev+'</div>'+noteHtml+'</div><div style="display:flex;align-items:center;gap:10px;"><div class="history-pts '+(h.pts>=0?'pos':'neg')+'">'+(h.pts>=0?'+':'')+h.pts+'</div><button onclick="deleteDay(\''+h.date+'\')" style="background:none;border:none;font-size:16px;color:#ccc;cursor:pointer;padding:4px;line-height:1;">✕</button></div></div></div>';
+    var noteHtml = h.note ? '<div class="history-note">' + escHtml(h.note) + '</div>' : '';
+    return '<div class="history-row"><div class="history-top"><div><div class="history-date">'+fmtDate(h.date)+'</div><div class="history-detail">'+(SL[h.sport]||h.sport||'—')+' · КС: '+(CL[h.cs]||'—')+'</div><div class="history-detail">'+escHtml(ev)+'</div>'+noteHtml+'</div><div style="display:flex;align-items:center;gap:10px;"><div class="history-pts '+(h.pts>=0?'pos':'neg')+'">'+(h.pts>=0?'+':'')+h.pts+'</div><button onclick="deleteDay(\''+h.date+'\')" style="background:none;border:none;font-size:16px;color:#ccc;cursor:pointer;padding:4px;line-height:1;">✕</button></div></div></div>';
   }).join('');
 }
 
@@ -598,6 +1013,7 @@ window.deleteDay = async function(dateStr) {
   showToast('Запись удалена');
 };
 
+// ── Stats ──
 function renderStats() {
   var d = new Date(); var mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
   var me = db.history.filter(function(h) { return h.date.startsWith(mk); });
@@ -635,10 +1051,17 @@ function renderWeekSummary() {
   var ws = document.getElementById('week-summary'); if (!ws) return;
   var sportCount = Object.values(db.weekSport).filter(Boolean).length;
   var weedPts = calcWeedPts();
-  var sportPts = sportCount * 10 + (db.weekBonusGiven ? 30 : 0);
+  var blocks = getBlocks();
+  var sb = blocks.find(function(b){return b.type==='sport';});
+  var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
+  var sportPts = sportCount * 10 + (db.weekBonusGiven ? bonusPts : 0);
   var wk = getWeekKey();
   var csPts = db.history.filter(function(h){return h.date>=wk;}).reduce(function(a,h){
-    if(h.cs==='off') return a+10; if(h.cs==='ok') return a+5; if(h.cs==='over') return a-10; return a;
+    var cb = blocks.find(function(b){return b.type==='cs';});
+    var off = cb ? (cb.ptsOff||10) : 10;
+    var ok = cb ? (cb.ptsOk||5) : 5;
+    var over = cb ? (cb.ptsOver||-10) : -10;
+    if(h.cs==='off') return a+off; if(h.cs==='ok') return a+ok; if(h.cs==='over') return a+over; return a;
   }, 0);
   var total = sportPts + csPts + weedPts;
   ws.innerHTML = '<div class="week-summary-title">Неделя с ' + fmtDate(wk) + '</div>' +
@@ -647,36 +1070,37 @@ function renderWeekSummary() {
     }).join('');
 }
 
+// ── Export ──
 window.exportCSV = function() {
   if (!db.history.length) { showToast('Нет данных'); return; }
-  var SL = { yoga:'Йога', pull:'Турники', basic:'Запасной' };
+  var blocks = getBlocks();
+  var sb = blocks.find(function(b){return b.type==='sport';});
+  var SL = {};
+  if (sb) sb.variants.forEach(function(v){ SL[v.key] = v.label; });
   var CL = { off:'не играл', ok:'в лимите', over:'перебор', none:'—' };
   var rows = ['Дата,Спорт,КС,Активность,Трава,Очки,Заметка'];
   db.history.forEach(function(h) {
     var ev = Array.isArray(h.evening) ? h.evening.join('|') : (h.evening||'');
-    rows.push([h.date,SL[h.sport]||'—',CL[h.cs]||'—',ev,h.weed||'—',h.pts,(h.note||'').replace(/,/g,' ')].join(','));
+    rows.push([h.date,SL[h.sport]||h.sport||'—',CL[h.cs]||'—',ev,h.weed||'—',h.pts,(h.note||'').replace(/,/g,' ')].join(','));
   });
   var blob = new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
   var url = URL.createObjectURL(blob); var a = document.createElement('a');
-  a.href = url; a.download = 'tracker_'+getMonthKey()+'.csv'; a.click(); URL.revokeObjectURL(url);
+  a.href = url; a.download = 'habits_'+getMonthKey()+'.csv'; a.click(); URL.revokeObjectURL(url);
   showToast('CSV скачан');
 };
 
-window.showTab = function(tab) {
-  ['today','stats','rewards','history'].forEach(function(t){
-    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
-  });
-  document.querySelectorAll('.tab').forEach(function(el,i){
-    el.className = ['today','stats','rewards','history'][i]===tab ? 'tab active' : 'tab';
-  });
-  if (tab==='rewards') renderRewards();
-  if (tab==='history') renderHistory();
-  if (tab==='stats') renderStats();
-};
-
+// ── Init ──
 updateHeader();
 updateDayNav();
-cloudLoad();
+initFirebase();
+// fallback если Firebase не загрузится за 4 сек
+setTimeout(function() {
+  if (!document.getElementById('blocks-container').innerHTML) {
+    localLoad();
+    updateScores(); renderBlocks(); updateSportWeek(); updateWeedWeek(); loadDay(0);
+    setSyncStatus('err', '⚠ локальный режим');
+  }
+}, 4000);
 </script>
 
 </body>
