@@ -395,17 +395,17 @@ let pinInput = '';
 function updatePinDots() {
   for (var i = 0; i < 4; i++) {
     var dot = document.getElementById('dot-' + i);
-    dot.className = 'pin-dot' + (i < pinInput.length ? ' filled' : '');
+    if (dot) dot.className = 'pin-dot' + (i < pinInput.length ? ' filled' : '');
   }
 }
 
 function pinError() {
-  for (var i = 0; i < 4; i++) document.getElementById('dot-' + i).className = 'pin-dot error';
-  document.getElementById('pin-error').textContent = 'Неверный PIN';
-  setTimeout(() => { pinInput = ''; updatePinDots(); document.getElementById('pin-error').textContent = ''; }, 800);
+  for (var i = 0; i < 4; i++) { var dot = document.getElementById('dot-'+i); if(dot) dot.className = 'pin-dot error'; }
+  var pe = document.getElementById('pin-error'); if(pe) pe.textContent = 'Неверный PIN';
+  setTimeout(() => { pinInput = ''; updatePinDots(); var pe2 = document.getElementById('pin-error'); if(pe2) pe2.textContent = ''; }, 800);
 }
 
-window.pinPress = function(val) {
+function handlePin(val) {
   if (val === 'del') { pinInput = pinInput.slice(0, -1); updatePinDots(); return; }
   if (pinInput.length >= 4) return;
   pinInput += val;
@@ -418,7 +418,18 @@ window.pinPress = function(val) {
       pinError();
     }
   }
-};
+}
+
+window.pinPress = handlePin;
+
+// Attach pin button listeners via JS (more reliable than onclick in module)
+document.querySelectorAll('.pin-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    var txt = btn.textContent.trim();
+    if (txt === '⌫') handlePin('del');
+    else if (txt && !btn.disabled) handlePin(txt);
+  });
+});
 
 function checkPin() {
   try { return localStorage.getItem(PIN_KEY) === '1'; } catch(e) { return false; }
