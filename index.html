@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Трекер">
+<meta name="theme-color" content="#1a1a1a">
+<title>Трекер Давида</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F4F0; color: #1a1a1a; min-height: 100vh; }
+.app { max-width: 420px; margin: 0 auto; padding: 16px 16px 40px; }
+.header { text-align: center; padding: 20px 0 16px; }
+.header h1 { font-size: 20px; font-weight: 600; color: #1a1a1a; }
+.header .date { font-size: 13px; color: #888; margin-top: 4px; }
+.day-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+.day-nav-btn { font-size: 16px; padding: 4px 14px; border-radius: 20px; border: 1.5px solid #e0e0e0; background: transparent; color: #555; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.day-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.day-nav-label { font-size: 13px; color: #555; font-weight: 600; min-width: 80px; text-align: center; }
+.score-card { background: #1a1a1a; border-radius: 18px; padding: 22px 20px; margin-bottom: 20px; }
+.score-big { font-size: 52px; font-weight: 700; color: #fff; line-height: 1; }
+.score-label { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.score-month { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display: flex; justify-content: space-between; }
+.score-month span:last-child { color: #fff; font-weight: 600; }
+.section { margin-bottom: 16px; }
+.section-title { font-size: 11px; color: #999; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; padding-left: 2px; }
+.card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 10px; }
+.item-label { font-size: 15px; font-weight: 500; color: #1a1a1a; }
+.item-sub { font-size: 12px; color: #999; margin-top: 2px; }
+.row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.btn-group { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
+.btn { font-size: 13px; padding: 7px 14px; border-radius: 20px; border: 1.5px solid #e0e0e0; background: transparent; color: #555; cursor: pointer; font-family: inherit; transition: all 0.15s; font-weight: 500; -webkit-tap-highlight-color: transparent; }
+.btn:active { transform: scale(0.96); }
+.btn.ag { background: #EAF3DE; border-color: #97C459; color: #3B6D11; }
+.btn.ar { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
+.btn.aa { background: #FAEEDA; border-color: #FAC775; color: #854F0B; }
+.cs-timer { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.timer-display { font-size: 32px; font-weight: 600; color: #1a1a1a; min-width: 80px; font-variant-numeric: tabular-nums; }
+.timer-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+.tok { background: #EAF3DE; color: #3B6D11; }
+.twarn { background: #FAEEDA; color: #854F0B; }
+.tover { background: #FCEBEB; color: #A32D2D; }
+.progress-bar { height: 5px; background: #f0f0f0; border-radius: 3px; margin-top: 12px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s, background 0.4s; }
+.manual-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.manual-row span { font-size: 12px; color: #999; flex-shrink: 0; }
+.manual-row input[type=number] { width: 64px; padding: 6px 8px; border-radius: 10px; border: 1.5px solid #e0e0e0; font-size: 13px; font-family: inherit; text-align: center; background: #fff; color: #1a1a1a; }
+.evening-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ev-btn { padding: 11px 8px; border-radius: 12px; border: 1.5px solid #e8e8e8; background: #fff; color: #555; font-size: 13px; cursor: pointer; text-align: center; font-family: inherit; font-weight: 500; -webkit-tap-highlight-color: transparent; transition: all 0.15s; }
+.ev-btn:active { transform: scale(0.96); }
+.ev-btn.sel { background: #E6F1FB; border-color: #85B7EB; color: #185FA5; }
+.week-labels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 10px 0 4px; }
+.week-label { text-align: center; font-size: 10px; color: #bbb; font-weight: 500; }
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.wd { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+.wd.done { background: #EAF3DE; color: #3B6D11; }
+.wd.miss { background: #FCEBEB; color: #A32D2D; }
+.wd.empty { background: #f5f5f5; color: #ccc; }
+.week-info { display: flex; justify-content: space-between; font-size: 12px; color: #999; margin-top: 10px; }
+.note-input { width: 100%; margin-top: 12px; padding: 8px 12px; border-radius: 10px; border: 1.5px solid #e0e0e0; font-size: 13px; font-family: inherit; color: #1a1a1a; background: #fff; resize: none; }
+.note-input:focus { outline: none; border-color: #bbb; }
+.save-btn { width: 100%; padding: 16px; font-size: 16px; font-weight: 600; border-radius: 14px; border: none; background: #1a1a1a; color: #fff; cursor: pointer; margin-top: 8px; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.save-btn:active { transform: scale(0.98); }
+.tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #e8e7e3; padding: 4px; border-radius: 12px; }
+.tab { flex: 1; padding: 9px; text-align: center; font-size: 13px; border-radius: 9px; cursor: pointer; color: #888; border: none; background: transparent; font-family: inherit; font-weight: 500; -webkit-tap-highlight-color: transparent; transition: all 0.15s; }
+.tab.active { background: #fff; color: #1a1a1a; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.rewards-list { display: flex; flex-direction: column; gap: 14px; }
+.reward-row { display: flex; flex-direction: column; gap: 6px; }
+.reward-header { display: flex; justify-content: space-between; align-items: center; }
+.reward-name { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+.reward-name.done { color: #3B6D11; }
+.reward-pts { font-size: 12px; color: #999; }
+.reward-pts.done { color: #3B6D11; font-weight: 600; }
+.reward-bar-wrap { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+.reward-bar-fill { height: 100%; border-radius: 3px; background: #378ADD; transition: width 0.5s; }
+.reward-bar-fill.done { background: #639922; }
+.history-row { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.history-row:last-child { border-bottom: none; }
+.history-top { display: flex; justify-content: space-between; align-items: center; }
+.history-date { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+.history-detail { font-size: 12px; color: #999; margin-top: 2px; }
+.history-note { font-size: 12px; color: #888; margin-top: 3px; font-style: italic; }
+.history-pts { font-size: 16px; font-weight: 700; }
+.history-pts.pos { color: #3B6D11; }
+.history-pts.neg { color: #A32D2D; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: 14px; padding: 14px; text-align: center; }
+.stat-val { font-size: 26px; font-weight: 700; color: #1a1a1a; }
+.stat-label { font-size: 11px; color: #999; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-label { text-align: center; font-size: 10px; color: #bbb; font-weight: 500; margin-bottom: 4px; }
+.cal-day { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; }
+.cal-day.has-data { background: #EAF3DE; color: #3B6D11; }
+.cal-day.has-data.neg { background: #FCEBEB; color: #A32D2D; }
+.cal-day.today-dot { border: 2px solid #1a1a1a; }
+.cal-day.empty-day { background: #f5f5f5; color: #ccc; }
+.cal-day.filler { background: transparent; }
+.export-btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 12px; border: 1.5px solid #e0e0e0; background: transparent; color: #555; cursor: pointer; font-family: inherit; margin-top: 8px; -webkit-tap-highlight-color: transparent; }
+.export-btn:active { transform: scale(0.98); }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 12px 24px; border-radius: 20px; font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.empty-state { font-size: 14px; color: #bbb; text-align: center; padding: 30px 0; }
+.week-summary-card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+.week-summary-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 10px; }
+.week-summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; padding: 4px 0; border-bottom: 1px solid #f5f5f5; }
+.week-summary-row:last-child { border-bottom: none; }
+.week-summary-row span:last-child { font-weight: 600; color: #1a1a1a; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('today')">Сегодня</button>
+    <button class="tab" onclick="showTab('stats')">Статистика</button>
+    <button class="tab" onclick="showTab('rewards')">Награды</button>
+    <button class="tab" onclick="showTab('history')">История</button>
+  </div>
+
+  <!-- TAB TODAY -->
+
+  <div id="tab-today">
+    <div class="header">
+      <h1>Давид</h1>
+      <div class="date" id="header-date"></div>
+      <div class="day-nav">
+        <button class="day-nav-btn" onclick="shiftDay(-1)">←</button>
+        <span class="day-nav-label" id="day-label">Сегодня</span>
+        <button class="day-nav-btn" id="btn-day-fwd" onclick="shiftDay(1)" disabled>→</button>
+      </div>
+    </div>
+
+```
+<div class="score-card">
+  <div class="score-big" id="today-score">0</div>
+  <div class="score-label">очков за этот день</div>
+  <div class="score-month">
+    <span>За месяц</span>
+    <span id="month-score">0</span>
+  </div>
+</div>
+
+<!-- SPORT -->
+<div class="section">
+  <div class="section-title">Спорт</div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <div class="item-label">Тренировка</div>
+        <div class="item-sub" id="sport-sub">не отмечено · +10 очков</div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" id="btn-yoga" onclick="setSport('yoga')">Йога</button>
+        <button class="btn" id="btn-pull" onclick="setSport('pull')">Турники</button>
+        <button class="btn" id="btn-basic" onclick="setSport('basic')">Запасной</button>
+      </div>
+    </div>
+    <div class="week-info">
+      <span>Streak этой недели</span>
+      <span id="week-sport-count">0 / 5 · бонус +30</span>
+    </div>
+    <div class="week-labels">
+      <div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div>
+      <div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div>
+    </div>
+    <div class="week-grid" id="sport-week"></div>
+  </div>
+</div>
+
+<!-- CS -->
+<div class="section">
+  <div class="section-title">Counter-Strike</div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <div class="item-label">Время в КС</div>
+        <div class="item-sub">лимит 1:30 · не играл +10</div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" id="btn-cs-off" onclick="setCSoff()">Не играл</button>
+        <button class="btn" id="btn-cs-start" onclick="toggleTimer()">Старт</button>
+      </div>
+    </div>
+    <div class="cs-timer">
+      <div class="timer-display" id="timer-display">0:00</div>
+      <div class="timer-badge tok" id="timer-badge">готов</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="cs-progress" style="width:0%;background:#639922;"></div>
+    </div>
+    <div class="manual-row">
+      <span>Добавить вручную:</span>
+      <input type="number" id="cs-manual" min="1" max="300" placeholder="мин">
+      <button class="btn" onclick="addManualCS()" style="padding:6px 12px;">+ мин</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEED -->
+<div class="section">
+  <div class="section-title">Трава (будние дни)</div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <div class="item-label">Сегодня</div>
+        <div class="item-sub" id="weed-sub">чистый день = +20 в конце недели</div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" id="btn-weed-no" onclick="setWeed('no')">Не курил</button>
+        <button class="btn" id="btn-weed-yes" onclick="setWeed('yes')">Курил</button>
+        <button class="btn" id="btn-weed-na" onclick="setWeed('na')">Выходной</button>
+      </div>
+    </div>
+    <div class="week-info">
+      <span>Итог недели</span>
+      <span id="weed-week-pts">0 очков</span>
+    </div>
+    <div class="week-labels">
+      <div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div>
+      <div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div>
+    </div>
+    <div class="week-grid" id="weed-week"></div>
+  </div>
+</div>
+
+<!-- EVENING -->
+<div class="section">
+  <div class="section-title">Вечерняя активность</div>
+  <div class="card">
+    <div class="item-sub" style="margin-bottom:10px;">можно выбрать несколько</div>
+    <div class="evening-grid">
+      <button class="ev-btn" onclick="toggleEvening(this)">Монтаж</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Вайбкодинг</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Прогулка</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Прогулка с подругой</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Друзья</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Звонки семье</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Чтение</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Фильм</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Другое</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE -->
+<div class="section">
+  <div class="section-title">Заметка</div>
+  <div class="card">
+    <textarea class="note-input" id="day-note" rows="2" placeholder="Как прошёл день..."></textarea>
+  </div>
+</div>
+
+<button class="save-btn" onclick="saveDay()">Сохранить день</button>
+```
+
+  </div>
+
+  <!-- TAB STATS -->
+
+  <div id="tab-stats" style="display:none;">
+    <div class="header">
+      <h1>Статистика</h1>
+      <div class="date" id="stats-month-label"></div>
+    </div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="section">
+      <div class="section-title">Календарь месяца</div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;">
+          <div class="cal-label">Пн</div><div class="cal-label">Вт</div><div class="cal-label">Ср</div>
+          <div class="cal-label">Чт</div><div class="cal-label">Пт</div><div class="cal-label">Сб</div><div class="cal-label">Вс</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Итог этой недели</div>
+      <div class="week-summary-card" id="week-summary"></div>
+    </div>
+  </div>
+
+  <!-- TAB REWARDS -->
+
+  <div id="tab-rewards" style="display:none;">
+    <div class="header">
+      <h1>Награды</h1>
+      <div class="date" id="rewards-month-label"></div>
+    </div>
+    <div class="score-card">
+      <div class="score-big" id="rewards-score">0</div>
+      <div class="score-label">очков за месяц</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Цели</div>
+      <div class="card">
+        <div class="rewards-list" id="rewards-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB HISTORY -->
+
+  <div id="tab-history" style="display:none;">
+    <div class="header">
+      <h1>История</h1>
+      <div class="date">последние 30 дней</div>
+    </div>
+    <div class="section">
+      <div class="card">
+        <div id="history-list"><div class="empty-state">Нет записей</div></div>
+      </div>
+    </div>
+    <button class="export-btn" onclick="exportCSV()">Экспорт в CSV</button>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var REWARDS = [
+  { pts: 100, name: 'Минимальная планка' },
+  { pts: 200, name: 'Фильм без угрызений совести' },
+  { pts: 350, name: 'Покупка на себя' },
+  { pts: 500, name: '1-2 свободных дня' },
+  { pts: 700, name: 'Что угодно' }
+];
+var MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+var MONTHS_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+var DAYS_RU = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+var SPORT_LABELS = { yoga: 'Йога · +10', pull: 'Турники · +10', basic: 'Запасной · +10' };
+
+var db = {
+  monthScore: 0, monthKey: '',
+  history: [],
+  weekSport: {}, weekWeed: {}, weekKey: '', weekBonusGiven: false
+};
+
+var day = { sport: null, cs: 'none', csSeconds: 0, csRunning: false, evening: [], weed: null, note: '' };
+var dayOffset = 0;
+var timerInt = null;
+
+function dbLoad() {
+  try { var s = localStorage.getItem('dtracker5'); if (s) db = JSON.parse(s); } catch(e) {}
+  if (!db.history) db.history = [];
+  if (!db.weekSport) db.weekSport = {};
+  if (!db.weekWeed) db.weekWeed = {};
+  var mk = getMonthKey();
+  if (db.monthKey !== mk) { db.monthScore = 0; db.monthKey = mk; }
+  var wk = getWeekKey();
+  if (db.weekKey !== wk) { db.weekSport = {}; db.weekWeed = {}; db.weekKey = wk; db.weekBonusGiven = false; }
+}
+
+function dbSave() {
+  try { localStorage.setItem('dtracker5', JSON.stringify(db)); } catch(e) {}
+}
+
+function getOffsetDate(off) { var d = new Date(); d.setDate(d.getDate() + off); return d; }
+function getDateStr(off) { return getOffsetDate(off).toISOString().split('T')[0]; }
+function getMonthKey() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
+function getWeekKey() {
+  var d = new Date(); var wd = d.getDay();
+  var diff = d.getDate() - wd + (wd === 0 ? -6 : 1);
+  return new Date(d.setDate(diff)).toISOString().split('T')[0];
+}
+function getDOW(off) { var d = getOffsetDate(off); var wd = d.getDay(); return wd === 0 ? 6 : wd - 1; }
+function fmtDate(str) { var p = str.split('-'); return parseInt(p[2]) + ' ' + MONTHS[parseInt(p[1])-1]; }
+
+function calcScore() {
+  var pts = 0;
+  if (day.sport) pts += 10;
+  if (day.cs === 'off') pts += 10;
+  else if (day.cs === 'ok') pts += 5;
+  else if (day.cs === 'over') pts -= 10;
+  return pts;
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2600);
+}
+
+function updateScores() {
+  document.getElementById('today-score').textContent = calcScore();
+  document.getElementById('month-score').textContent = db.monthScore;
+  var rs = document.getElementById('rewards-score'); if (rs) rs.textContent = db.monthScore;
+}
+
+function updateHeader() {
+  var d = new Date();
+  document.getElementById('header-date').textContent = DAYS_RU[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+  var rl = document.getElementById('rewards-month-label'); if (rl) rl.textContent = getMonthKey().replace('-',' / ');
+  var sl = document.getElementById('stats-month-label'); if (sl) sl.textContent = getMonthKey().replace('-',' / ');
+}
+
+function updateDayNav() {
+  var d = getOffsetDate(dayOffset); var label;
+  if (dayOffset === 0) label = 'Сегодня';
+  else if (dayOffset === -1) label = 'Вчера';
+  else label = d.getDate() + ' ' + MONTHS[d.getMonth()];
+  document.getElementById('day-label').textContent = label;
+  document.getElementById('btn-day-fwd').disabled = dayOffset === 0;
+}
+
+function updateSportBtns() {
+  ['yoga','pull','basic'].forEach(function(t) {
+    document.getElementById('btn-'+t).className = 'btn' + (day.sport === t ? ' ag' : '');
+  });
+  document.getElementById('sport-sub').textContent = day.sport ? SPORT_LABELS[day.sport] : 'не отмечено · +10 очков';
+}
+
+function updateCSBtns() {
+  document.getElementById('btn-cs-off').className = 'btn' + (day.cs === 'off' ? ' ag' : '');
+  var sb = document.getElementById('btn-cs-start');
+  sb.textContent = day.csRunning ? 'Пауза' : (day.csSeconds > 0 ? 'Продолжить' : 'Старт');
+}
+
+function updateTimer() {
+  var m = Math.floor(day.csSeconds / 60); var s = day.csSeconds % 60;
+  document.getElementById('timer-display').textContent = m + ':' + String(s).padStart(2,'0');
+  var limit = 90 * 60; var pct = Math.min(100, Math.round(day.csSeconds / limit * 100));
+  var bar = document.getElementById('cs-progress'); var badge = document.getElementById('timer-badge');
+  if (day.csSeconds === 0) {
+    bar.style.width = '0%'; bar.style.background = '#639922';
+    badge.textContent = 'готов'; badge.className = 'timer-badge tok';
+  } else if (day.csSeconds <= limit) {
+    bar.style.width = pct + '%'; bar.style.background = pct > 80 ? '#EF9F27' : '#639922';
+    badge.textContent = 'в лимите'; badge.className = 'timer-badge ' + (pct > 80 ? 'twarn' : 'tok');
+    day.cs = 'ok';
+  } else {
+    bar.style.width = '100%'; bar.style.background = '#E24B4A';
+    var over = day.csSeconds - limit; var om = Math.floor(over/60); var os = over%60;
+    badge.textContent = '+' + om + ':' + String(os).padStart(2,'0') + ' сверх';
+    badge.className = 'timer-badge tover'; day.cs = 'over';
+  }
+  updateScores();
+}
+
+function updateEveningBtns() {
+  document.querySelectorAll('.ev-btn').forEach(function(b) {
+    var active = day.evening.indexOf(b.textContent.trim()) !== -1;
+    b.className = active ? 'ev-btn sel' : 'ev-btn';
+  });
+}
+
+function updateWeedBtns() {
+  ['no','yes','na'].forEach(function(v) {
+    var b = document.getElementById('btn-weed-'+v);
+    var cls = v==='no' ? ' ag' : v==='yes' ? ' ar' : ' aa';
+    b.className = 'btn' + (day.weed === v ? cls : '');
+  });
+  var subs = { no:'+20 в конце недели', yes:'штраф в конце недели', na:'выходной, не считается' };
+  document.getElementById('weed-sub').textContent = subs[day.weed] || 'чистый день = +20 в конце недели';
+}
+
+function updateSportWeek() {
+  var grid = document.getElementById('sport-week'); if (!grid) return;
+  grid.innerHTML = ''; var count = 0;
+  for (var i = 0; i < 7; i++) {
+    var d = document.createElement('div');
+    if (db.weekSport['d'+i]) { d.className = 'wd done'; d.textContent = '+'; count++; }
+    else { d.className = 'wd empty'; d.textContent = '·'; }
+    grid.appendChild(d);
+  }
+  document.getElementById('week-sport-count').textContent = count + ' / 5 · бонус +30';
+}
+
+function calcWeedPts() {
+  var pts = 0, misses = 0;
+  for (var i = 0; i < 5; i++) {
+    var v = db.weekWeed['d'+i];
+    if (v === 'no') pts += 20;
+    else if (v === 'yes') { misses++; pts -= 10 + Math.max(0,(misses-1)*5); }
+  }
+  return pts;
+}
+
+function updateWeedWeek() {
+  var grid = document.getElementById('weed-week'); if (!grid) return;
+  grid.innerHTML = '';
+  for (var i = 0; i < 7; i++) {
+    var d = document.createElement('div'); var v = db.weekWeed['d'+i];
+    if (v === 'no') { d.className = 'wd done'; d.textContent = '+'; }
+    else if (v === 'yes') { d.className = 'wd miss'; d.textContent = '×'; }
+    else { d.className = 'wd empty'; d.textContent = '·'; }
+    grid.appendChild(d);
+  }
+  document.getElementById('weed-week-pts').textContent = calcWeedPts() + ' очков';
+}
+
+function loadDay(off) {
+  clearInterval(timerInt); timerInt = null;
+  var entry = null;
+  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === getDateStr(off)) { entry = db.history[i]; break; } }
+  day.sport = entry ? entry.sport : null;
+  day.cs = entry ? entry.cs : 'none';
+  day.csSeconds = entry ? (entry.csSeconds || 0) : 0;
+  day.csRunning = false;
+  day.evening = entry ? (Array.isArray(entry.evening) ? entry.evening : (entry.evening ? [entry.evening] : [])) : [];
+  day.weed = entry ? entry.weed : null;
+  day.note = entry ? (entry.note || '') : '';
+  document.getElementById('day-note').value = day.note;
+  updateSportBtns(); updateCSBtns(); updateTimer(); updateEveningBtns(); updateWeedBtns(); updateScores();
+}
+
+function shiftDay(dir) {
+  var next = dayOffset + dir; if (next > 0) return;
+  dayOffset = next; loadDay(dayOffset); updateDayNav();
+}
+
+function setSport(type) { day.sport = day.sport === type ? null : type; updateSportBtns(); updateScores(); }
+
+function setCSoff() {
+  clearInterval(timerInt); timerInt = null;
+  day.cs = 'off'; day.csSeconds = 0; day.csRunning = false;
+  updateCSBtns(); updateTimer(); updateScores();
+}
+
+function toggleTimer() {
+  document.getElementById('btn-cs-off').className = 'btn';
+  if (day.cs === 'off') day.cs = 'none';
+  if (day.csRunning) { clearInterval(timerInt); timerInt = null; day.csRunning = false; }
+  else { day.csRunning = true; timerInt = setInterval(function() { day.csSeconds++; updateTimer(); }, 1000); }
+  updateCSBtns();
+}
+
+function addManualCS() {
+  var inp = document.getElementById('cs-manual'); var mins = parseInt(inp.value);
+  if (!mins || mins < 1) return;
+  if (day.cs === 'off') day.cs = 'none';
+  document.getElementById('btn-cs-off').className = 'btn';
+  day.csSeconds += mins * 60; inp.value = '';
+  updateTimer(); updateCSBtns();
+}
+
+function toggleEvening(el) {
+  var activity = el.textContent.trim();
+  var idx = day.evening.indexOf(activity);
+  if (idx === -1) day.evening.push(activity); else day.evening.splice(idx, 1);
+  updateEveningBtns();
+}
+
+function setWeed(val) {
+  day.weed = day.weed === val ? null : val;
+  var d = getDOW(dayOffset);
+  if (day.weed) db.weekWeed['d'+d] = day.weed; else delete db.weekWeed['d'+d];
+  updateWeedBtns(); updateWeedWeek();
+}
+
+function saveDay() {
+  day.note = document.getElementById('day-note').value.trim();
+  var pts = calcScore();
+  var today = getDateStr(dayOffset);
+  var d = getDOW(dayOffset);
+  if (day.sport) db.weekSport['d'+d] = true;
+  if (day.weed) db.weekWeed['d'+d] = day.weed;
+  var sportCount = Object.values(db.weekSport).filter(Boolean).length;
+  var bonus = 0;
+  if (sportCount >= 5 && !db.weekBonusGiven) { bonus = 30; db.weekBonusGiven = true; }
+  var entry = { date: today, sport: day.sport, cs: day.cs, csSeconds: day.csSeconds, evening: day.evening.slice(), weed: day.weed, note: day.note, pts: pts };
+  var idx = -1;
+  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === today) { idx = i; break; } }
+  if (idx >= 0) { db.monthScore = Math.max(0, db.monthScore + pts - db.history[idx].pts); db.history[idx] = entry; }
+  else { db.monthScore += pts; db.history.push(entry); }
+  if (bonus > 0) db.monthScore += bonus;
+  dbSave(); updateScores(); updateSportWeek(); updateWeedWeek();
+  var msg = bonus > 0 ? 'Сохранено · +' + pts + ' оч. + бонус +30!' : 'Сохранено · ' + (pts >= 0 ? '+' : '') + pts + ' очков';
+  showToast(msg);
+}
+
+function renderRewards() {
+  var list = document.getElementById('rewards-list'); if (!list) return;
+  list.innerHTML = REWARDS.map(function(r) {
+    var done = db.monthScore >= r.pts; var pct = Math.min(100, Math.round(db.monthScore / r.pts * 100));
+    return '<div class="reward-row"><div class="reward-header"><span class="reward-name'+(done?' done':'')+'">'+( done?'✓ ':'')+r.name+'</span><span class="reward-pts'+(done?' done':'')+'">' +r.pts+' оч.</span></div><div class="reward-bar-wrap"><div class="reward-bar-fill'+(done?' done':'')+'" style="width:'+pct+'%"></div></div></div>';
+  }).join('');
+}
+
+function renderHistory() {
+  var list = document.getElementById('history-list'); if (!list) return;
+  if (!db.history.length) { list.innerHTML = '<div class="empty-state">Нет записей</div>'; return; }
+  var SL = { yoga:'Йога', pull:'Турники', basic:'Запасной' };
+  var CL = { off:'нет', ok:'лимит', over:'перебор', none:'—' };
+  var rows = db.history.slice(-30).reverse();
+  list.innerHTML = rows.map(function(h) {
+    var ev = Array.isArray(h.evening) ? h.evening.join(', ') : (h.evening || '—');
+    var noteHtml = h.note ? '<div class="history-note">' + h.note + '</div>' : '';
+    return '<div class="history-row"><div class="history-top"><div><div class="history-date">'+fmtDate(h.date)+'</div><div class="history-detail">'+(SL[h.sport]||'—')+' · КС: '+(CL[h.cs]||'—')+'</div><div class="history-detail">'+ev+'</div>'+noteHtml+'</div><div class="history-pts '+(h.pts>=0?'pos':'neg')+'">'+(h.pts>=0?'+':'')+h.pts+'</div></div></div>';
+  }).join('');
+}
+
+function renderStats() {
+  var d = new Date();
+  var mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  var monthEntries = db.history.filter(function(h) { return h.date.startsWith(mk); });
+  var totalDays = monthEntries.length;
+  var sportDays = monthEntries.filter(function(h) { return h.sport; }).length;
+  var csOkDays = monthEntries.filter(function(h) { return h.cs === 'ok' || h.cs === 'off'; }).length;
+  var cleanDays = monthEntries.filter(function(h) { return h.weed === 'no'; }).length;
+  var avgScore = totalDays > 0 ? Math.round(monthEntries.reduce(function(a,h) { return a+h.pts; }, 0) / totalDays) : 0;
+  var sg = document.getElementById('stats-grid');
+  if (!sg) return;
+  sg.innerHTML = [
+    { val: totalDays, label: 'Дней записано' },
+    { val: sportDays, label: 'Дней спорта' },
+    { val: csOkDays, label: 'КС в лимите' },
+    { val: cleanDays + ' / ' + totalDays, label: 'Без травы (будн.)' }
+  ].map(function(s) {
+    return '<div class="stat-card"><div class="stat-val">'+s.val+'</div><div class="stat-label">'+s.label+'</div></div>';
+  }).join('');
+
+  renderCalendar();
+  renderWeekSummary();
+}
+
+function renderCalendar() {
+  var grid = document.getElementById('cal-grid'); if (!grid) return;
+  var d = new Date(); var year = d.getFullYear(); var month = d.getMonth();
+  var today = d.getDate();
+  var firstDay = new Date(year, month, 1).getDay();
+  firstDay = firstDay === 0 ? 6 : firstDay - 1;
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+  var mk = year + '-' + String(month+1).padStart(2,'0');
+  var entryMap = {};
+  db.history.filter(function(h) { return h.date.startsWith(mk); }).forEach(function(h) {
+    var day = parseInt(h.date.split('-')[2]); entryMap[day] = h.pts;
+  });
+  var html = '';
+  for (var i = 0; i < firstDay; i++) html += '<div class="cal-day filler"></div>';
+  for (var i = 1; i <= daysInMonth; i++) {
+    var pts = entryMap[i];
+    var cls = 'cal-day';
+    if (pts !== undefined) cls += pts >= 0 ? ' has-data' : ' has-data neg';
+    else cls += ' empty-day';
+    if (i === today) cls += ' today-dot';
+    html += '<div class="'+cls+'">'+(pts !== undefined ? (pts>0?'+':'')+pts : i)+'</div>';
+  }
+  grid.innerHTML = html;
+}
+
+function renderWeekSummary() {
+  var ws = document.getElementById('week-summary'); if (!ws) return;
+  var sportCount = Object.values(db.weekSport).filter(Boolean).length;
+  var weedPts = calcWeedPts();
+  var bonus = db.weekBonusGiven ? 30 : (sportCount >= 5 ? 30 : 0);
+  var wk = getWeekKey();
+  var weekEntries = db.history.filter(function(h) { return h.date >= wk; });
+  var sportPts = sportCount * 10 + (db.weekBonusGiven ? 30 : 0);
+  var csPts = weekEntries.reduce(function(a,h) {
+    if (h.cs==='off') return a+10; if (h.cs==='ok') return a+5; if (h.cs==='over') return a-10; return a;
+  }, 0);
+  var total = sportPts + csPts + weedPts;
+  ws.innerHTML = '<div class="week-summary-title">Неделя с ' + fmtDate(wk) + '</div>' + [
+    ['Спорт', sportCount + '/5 дней · ' + sportPts + ' оч.'],
+    ['КС', csPts + ' оч.'],
+    ['Трава', weedPts + ' оч.'],
+    ['Итого', total + ' оч.'],
+  ].map(function(r) {
+    return '<div class="week-summary-row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';
+  }).join('');
+}
+
+function exportCSV() {
+  if (!db.history.length) { showToast('Нет данных для экспорта'); return; }
+  var SL = { yoga:'Йога', pull:'Турники', basic:'Запасной' };
+  var CL = { off:'не играл', ok:'в лимите', over:'перебор', none:'—' };
+  var rows = ['Дата,Спорт,КС,Активность,Трава,Очки,Заметка'];
+  db.history.forEach(function(h) {
+    var ev = Array.isArray(h.evening) ? h.evening.join('|') : (h.evening||'');
+    rows.push([h.date, SL[h.sport]||'—', CL[h.cs]||'—', ev, h.weed||'—', h.pts, (h.note||'').replace(/,/g,' ')].join(','));
+  });
+  var blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url;
+  a.download = 'tracker_' + getMonthKey() + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('CSV скачан');
+}
+
+function showTab(tab) {
+  ['today','stats','rewards','history'].forEach(function(t) {
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(function(el, i) {
+    el.className = ['today','stats','rewards','history'][i]===tab ? 'tab active' : 'tab';
+  });
+  if (tab==='rewards') renderRewards();
+  if (tab==='history') renderHistory();
+  if (tab==='stats') renderStats();
+}
+
+dbLoad();
+updateHeader();
+updateDayNav();
+loadDay(0);
+updateSportWeek();
+updateWeedWeek();
+</script>
+
+</body>
+</html>
