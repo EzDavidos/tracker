@@ -177,6 +177,54 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </head>
 <body>
 
+<script>
+var CORRECT_PIN = '1234';
+var PIN_KEY = 'hc_pin_ok';
+var pinInput = '';
+
+function updatePinDots() {
+  for (var i = 0; i < 4; i++) {
+    var dot = document.getElementById('dot-' + i);
+    if (dot) dot.className = 'pin-dot' + (i < pinInput.length ? ' filled' : '');
+  }
+}
+
+function pinError() {
+  for (var i = 0; i < 4; i++) { var d = document.getElementById('dot-'+i); if(d) d.className = 'pin-dot error'; }
+  var pe = document.getElementById('pin-error'); if(pe) pe.textContent = 'Неверный PIN';
+  setTimeout(function() { pinInput = ''; updatePinDots(); var pe2 = document.getElementById('pin-error'); if(pe2) pe2.textContent = ''; }, 800);
+}
+
+function pinPress(val) {
+  if (val === 'del') { pinInput = pinInput.slice(0,-1); updatePinDots(); return; }
+  if (pinInput.length >= 4) return;
+  pinInput += val;
+  updatePinDots();
+  if (pinInput.length === 4) {
+    if (pinInput === CORRECT_PIN) {
+      try { localStorage.setItem(PIN_KEY, '1'); } catch(e) {}
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      if (window._appReady) window._appReady();
+    } else {
+      pinError();
+    }
+  }
+}
+
+function checkPin() {
+  try { return localStorage.getItem(PIN_KEY) === '1'; } catch(e) { return false; }
+}
+
+if (checkPin()) {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    if (window._appReady) window._appReady();
+  });
+}
+</script>
+
 <!-- AUTH SCREEN -->
 
 <div id="auth-screen" class="auth-screen">
@@ -315,9 +363,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const fsdb = getFirestore(fbApp);
 
-const CORRECT_PIN = '1234'; // ← СМЕНИ НА СВОЙ PIN
 const USER_ID = 'david';
-const PIN_KEY = 'hc_pin_ok';
 
 const REWARDS = [
   { pts: 100, name: 'Минимальная планка' },
@@ -379,7 +425,6 @@ const DEFAULT_BLOCKS = [
   }
 ];
 
-let currentUser = null;
 let db = { monthScore: 0, monthKey: '', history: [], weekSport: {}, weekWeed: {}, weekKey: '', weekBonusGiven: false, blocks: null };
 let day = { sport: null, cs: 'none', csSeconds: 0, csRunning: false, evening: [], weed: null, note: '' };
 let dayOffset = 0;
@@ -389,55 +434,8 @@ let editingBlockId = null;
 let editingBlockData = null;
 let blocks = JSON.parse(JSON.stringify(DEFAULT_BLOCKS));
 
-// ── PIN AUTH ──
-let pinInput = '';
-
-function updatePinDots() {
-  for (var i = 0; i < 4; i++) {
-    var dot = document.getElementById('dot-' + i);
-    if (dot) dot.className = 'pin-dot' + (i < pinInput.length ? ' filled' : '');
-  }
-}
-
-function pinError() {
-  for (var i = 0; i < 4; i++) { var dot = document.getElementById('dot-'+i); if(dot) dot.className = 'pin-dot error'; }
-  var pe = document.getElementById('pin-error'); if(pe) pe.textContent = 'Неверный PIN';
-  setTimeout(() => { pinInput = ''; updatePinDots(); var pe2 = document.getElementById('pin-error'); if(pe2) pe2.textContent = ''; }, 800);
-}
-
-function handlePin(val) {
-  if (val === 'del') { pinInput = pinInput.slice(0, -1); updatePinDots(); return; }
-  if (pinInput.length >= 4) return;
-  pinInput += val;
-  updatePinDots();
-  if (pinInput.length === 4) {
-    if (pinInput === CORRECT_PIN) {
-      try { localStorage.setItem(PIN_KEY, '1'); } catch(e) {}
-      initApp();
-    } else {
-      pinError();
-    }
-  }
-}
-
-window.pinPress = handlePin;
-
-// Attach pin button listeners via JS (more reliable than onclick in module)
-document.querySelectorAll('.pin-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    var txt = btn.textContent.trim();
-    if (txt === '⌫') handlePin('del');
-    else if (txt && !btn.disabled) handlePin(txt);
-  });
-});
-
-function checkPin() {
-  try { return localStorage.getItem(PIN_KEY) === '1'; } catch(e) { return false; }
-}
-
+// ── INIT ──
 function initApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'block';
   document.getElementById('user-name').textContent = 'Давид';
   document.getElementById('header-name').textContent = 'Давид';
   updateHeader();
@@ -445,17 +443,18 @@ function initApp() {
   cloudLoad();
 }
 
+window._appReady = initApp;
+
 window.signOut = function() {
   if (confirm('Выйти?')) {
-    try { localStorage.removeItem(PIN_KEY); } catch(e) {}
+    try { localStorage.removeItem('hc_pin_ok'); } catch(e) {}
     document.getElementById('auth-screen').style.display = 'flex';
     document.getElementById('main-app').style.display = 'none';
-    pinInput = ''; updatePinDots();
   }
 };
 
-// Auto-login if PIN already entered before
-if (checkPin()) { initApp(); }
+// if already past auth (auto-login happened before module loaded)
+if (document.getElementById('main-app').style.display === 'block') initApp();
 
 // ── CLOUD ──
 function setSyncStatus(s, m) {
