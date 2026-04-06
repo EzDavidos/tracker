@@ -6,59 +6,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Habits Creator">
+<meta name="apple-mobile-web-app-title" content="Трекер">
 <meta name="theme-color" content="#1a1a1a">
-<title>Habits Creator</title>
+<title>Трекер Давида</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F5F4F0; color: #1a1a1a; min-height: 100vh; }
 .app { max-width: 420px; margin: 0 auto; padding: 16px 16px 40px; }
-
-/* AUTH SCREEN */
-.auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 32px; text-align: center; }
-.auth-logo { font-size: 48px; margin-bottom: 16px; }
-.auth-title { font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
-.auth-sub { font-size: 14px; color: #888; margin-bottom: 40px; }
-.google-btn { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 14px; border: 1.5px solid #e0e0e0; background: #fff; font-size: 15px; font-weight: 600; color: #1a1a1a; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; width: 100%; justify-content: center; }
-.google-btn:active { transform: scale(0.98); }
-.google-icon { width: 20px; height: 20px; }
-.pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #ccc; background: transparent; transition: all 0.15s; }
-.pin-dot.filled { background: #1a1a1a; border-color: #1a1a1a; }
-.pin-dot.error { background: #E24B4A; border-color: #E24B4A; }
-.pin-btn { padding: 18px; font-size: 22px; font-weight: 500; border-radius: 14px; border: 1.5px solid #e0e0e0; background: #fff; color: #1a1a1a; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; transition: all 0.1s; }
-.pin-btn:active { background: #f0f0f0; transform: scale(0.95); }
-
-/* USER BAR */
-.user-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 0 16px; }
-.user-info { display: flex; align-items: center; gap: 8px; }
-.user-avatar { width: 28px; height: 28px; border-radius: 50%; }
-.user-name { font-size: 13px; font-weight: 500; color: #555; }
-.logout-btn { font-size: 12px; color: #bbb; background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 8px; }
-.edit-mode-btn { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1.5px solid #e0e0e0; background: transparent; color: #555; cursor: pointer; font-family: inherit; font-weight: 500; -webkit-tap-highlight-color: transparent; }
-.edit-mode-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-
-/* HEADER */
-.header { text-align: center; padding: 4px 0 16px; }
+.header { text-align: center; padding: 20px 0 16px; }
 .header h1 { font-size: 20px; font-weight: 600; color: #1a1a1a; }
 .header .date { font-size: 13px; color: #888; margin-top: 4px; }
 .day-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
 .day-nav-btn { font-size: 16px; padding: 4px 14px; border-radius: 20px; border: 1.5px solid #e0e0e0; background: transparent; color: #555; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
-.day-nav-btn:disabled { opacity: 0.3; }
+.day-nav-btn:disabled { opacity: 0.3; cursor: default; }
 .day-nav-label { font-size: 13px; color: #555; font-weight: 600; min-width: 80px; text-align: center; }
-
-/* SCORE */
 .score-card { background: #1a1a1a; border-radius: 18px; padding: 22px 20px; margin-bottom: 20px; }
 .score-big { font-size: 52px; font-weight: 700; color: #fff; line-height: 1; }
 .score-label { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
 .score-month { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display: flex; justify-content: space-between; }
 .score-month span:last-child { color: #fff; font-weight: 600; }
-.sync-status { font-size: 11px; text-align: center; margin-bottom: 8px; min-height: 16px; }
-.sync-ok { color: #3B6D11; } .sync-pending { color: #854F0B; } .sync-err { color: #A32D2D; }
-
-/* BLOCKS */
-.section { margin-bottom: 16px; position: relative; }
+.sync-status { font-size: 11px; text-align: center; margin-top: 8px; padding: 4px 0; }
+.sync-ok { color: #3B6D11; }
+.sync-pending { color: #854F0B; }
+.sync-err { color: #A32D2D; }
+.section { margin-bottom: 16px; }
 .section-title { font-size: 11px; color: #999; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; padding-left: 2px; }
-.card { background: #fff; border-radius: 16px; padding: 16px; }
+.card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 10px; }
 .item-label { font-size: 15px; font-weight: 500; color: #1a1a1a; }
 .item-sub { font-size: 12px; color: #999; margin-top: 2px; }
 .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -68,25 +41,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn.ag { background: #EAF3DE; border-color: #97C459; color: #3B6D11; }
 .btn.ar { background: #FCEBEB; border-color: #F09595; color: #A32D2D; }
 .btn.aa { background: #FAEEDA; border-color: #FAC775; color: #854F0B; }
-
-/* CS TIMER */
 .cs-timer { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
 .timer-display { font-size: 32px; font-weight: 600; color: #1a1a1a; min-width: 80px; font-variant-numeric: tabular-nums; }
 .timer-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
-.tok { background: #EAF3DE; color: #3B6D11; } .twarn { background: #FAEEDA; color: #854F0B; } .tover { background: #FCEBEB; color: #A32D2D; }
+.tok { background: #EAF3DE; color: #3B6D11; }
+.twarn { background: #FAEEDA; color: #854F0B; }
+.tover { background: #FCEBEB; color: #A32D2D; }
 .progress-bar { height: 5px; background: #f0f0f0; border-radius: 3px; margin-top: 12px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; transition: width 0.4s, background 0.4s; }
 .manual-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
 .manual-row span { font-size: 12px; color: #999; flex-shrink: 0; }
 .manual-row input[type=number] { width: 64px; padding: 6px 8px; border-radius: 10px; border: 1.5px solid #e0e0e0; font-size: 13px; font-family: inherit; text-align: center; background: #fff; color: #1a1a1a; }
-
-/* EVENING */
 .evening-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ev-btn { padding: 11px 8px; border-radius: 12px; border: 1.5px solid #e8e8e8; background: #fff; color: #555; font-size: 13px; cursor: pointer; text-align: center; font-family: inherit; font-weight: 500; -webkit-tap-highlight-color: transparent; transition: all 0.15s; }
 .ev-btn:active { transform: scale(0.96); }
 .ev-btn.sel { background: #E6F1FB; border-color: #85B7EB; color: #185FA5; }
-
-/* WEEK */
 .week-labels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 10px 0 4px; }
 .week-label { text-align: center; font-size: 10px; color: #bbb; font-weight: 500; }
 .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -95,21 +64,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .wd.miss { background: #FCEBEB; color: #A32D2D; }
 .wd.empty { background: #f5f5f5; color: #ccc; }
 .week-info { display: flex; justify-content: space-between; font-size: 12px; color: #999; margin-top: 10px; }
-
-/* NOTE */
 .note-input { width: 100%; margin-top: 12px; padding: 8px 12px; border-radius: 10px; border: 1.5px solid #e0e0e0; font-size: 13px; font-family: inherit; color: #1a1a1a; background: #fff; resize: none; }
 .note-input:focus { outline: none; border-color: #bbb; }
-
-/* SAVE */
 .save-btn { width: 100%; padding: 16px; font-size: 16px; font-weight: 600; border-radius: 14px; border: none; background: #1a1a1a; color: #fff; cursor: pointer; margin-top: 8px; font-family: inherit; -webkit-tap-highlight-color: transparent; }
 .save-btn:active { transform: scale(0.98); }
-
-/* TABS */
 .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #e8e7e3; padding: 4px; border-radius: 12px; }
 .tab { flex: 1; padding: 9px; text-align: center; font-size: 13px; border-radius: 9px; cursor: pointer; color: #888; border: none; background: transparent; font-family: inherit; font-weight: 500; -webkit-tap-highlight-color: transparent; transition: all 0.15s; }
 .tab.active { background: #fff; color: #1a1a1a; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-/* REWARDS */
 .rewards-list { display: flex; flex-direction: column; gap: 14px; }
 .reward-row { display: flex; flex-direction: column; gap: 6px; }
 .reward-header { display: flex; justify-content: space-between; align-items: center; }
@@ -120,8 +81,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .reward-bar-wrap { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
 .reward-bar-fill { height: 100%; border-radius: 3px; background: #378ADD; transition: width 0.5s; }
 .reward-bar-fill.done { background: #639922; }
-
-/* HISTORY */
 .history-row { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
 .history-row:last-child { border-bottom: none; }
 .history-top { display: flex; justify-content: space-between; align-items: center; }
@@ -129,9 +88,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .history-detail { font-size: 12px; color: #999; margin-top: 2px; }
 .history-note { font-size: 12px; color: #888; margin-top: 3px; font-style: italic; }
 .history-pts { font-size: 16px; font-weight: 700; }
-.history-pts.pos { color: #3B6D11; } .history-pts.neg { color: #A32D2D; }
-
-/* STATS */
+.history-pts.pos { color: #3B6D11; }
+.history-pts.neg { color: #A32D2D; }
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 .stat-card { background: #fff; border-radius: 14px; padding: 14px; text-align: center; }
 .stat-val { font-size: 26px; font-weight: 700; color: #1a1a1a; }
@@ -144,130 +102,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .cal-day.today-dot { border: 2px solid #1a1a1a; }
 .cal-day.empty-day { background: #f5f5f5; color: #ccc; }
 .cal-day.filler { background: transparent; }
+.export-btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 12px; border: 1.5px solid #e0e0e0; background: transparent; color: #555; cursor: pointer; font-family: inherit; margin-top: 8px; -webkit-tap-highlight-color: transparent; }
+.export-btn:active { transform: scale(0.98); }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 12px 24px; border-radius: 20px; font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.empty-state { font-size: 14px; color: #bbb; text-align: center; padding: 30px 0; }
 .week-summary-card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
 .week-summary-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 10px; }
 .week-summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; padding: 4px 0; border-bottom: 1px solid #f5f5f5; }
 .week-summary-row:last-child { border-bottom: none; }
 .week-summary-row span:last-child { font-weight: 600; color: #1a1a1a; }
-
-/* EDIT MODE */
-.block-edit-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
-.block-order-btn { font-size: 14px; padding: 4px 10px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fff; color: #555; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
-.block-order-btn:disabled { opacity: 0.3; }
-.block-hide-btn { font-size: 12px; padding: 4px 10px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fff; color: #A32D2D; cursor: pointer; font-family: inherit; }
-.block-edit-btn { font-size: 12px; padding: 4px 10px; border-radius: 10px; border: 1.5px solid #e0e0e0; background: #fff; color: #185FA5; cursor: pointer; font-family: inherit; }
-.edit-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: flex-end; }
-.edit-panel { background: #fff; border-radius: 20px 20px 0 0; padding: 24px 20px 40px; width: 100%; max-height: 80vh; overflow-y: auto; }
-.edit-panel h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
-.edit-item-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.edit-item-row input[type=text] { flex: 1; padding: 8px 12px; border-radius: 10px; border: 1.5px solid #e0e0e0; font-size: 14px; font-family: inherit; color: #1a1a1a; background: #fff; }
-.edit-item-row input[type=number] { width: 60px; padding: 8px 8px; border-radius: 10px; border: 1.5px solid #e0e0e0; font-size: 14px; font-family: inherit; text-align: center; }
-.edit-item-row input:focus { outline: none; border-color: #bbb; }
-.edit-del-btn { font-size: 16px; color: #ccc; background: none; border: none; cursor: pointer; padding: 4px; }
-.edit-add-btn { width: 100%; padding: 10px; border-radius: 10px; border: 1.5px dashed #e0e0e0; background: transparent; color: #888; font-size: 14px; font-family: inherit; cursor: pointer; margin-top: 4px; }
-.edit-save-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: #1a1a1a; color: #fff; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 16px; }
-.edit-pts-label { font-size: 11px; color: #999; text-align: center; min-width: 30px; }
-
-.export-btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 12px; border: 1.5px solid #e0e0e0; background: transparent; color: #555; cursor: pointer; font-family: inherit; margin-top: 8px; }
-.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1a1a; color: #fff; padding: 12px 24px; border-radius: 20px; font-size: 14px; font-weight: 500; opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap; pointer-events: none; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.empty-state { font-size: 14px; color: #bbb; text-align: center; padding: 30px 0; }
 </style>
-
 </head>
 <body>
-
-<script>
-var CORRECT_PIN = '1234';
-var PIN_KEY = 'hc_pin_ok';
-var pinInput = '';
-
-function updatePinDots() {
-  for (var i = 0; i < 4; i++) {
-    var dot = document.getElementById('dot-' + i);
-    if (dot) dot.className = 'pin-dot' + (i < pinInput.length ? ' filled' : '');
-  }
-}
-
-function pinError() {
-  for (var i = 0; i < 4; i++) { var d = document.getElementById('dot-'+i); if(d) d.className = 'pin-dot error'; }
-  var pe = document.getElementById('pin-error'); if(pe) pe.textContent = 'Неверный PIN';
-  setTimeout(function() { pinInput = ''; updatePinDots(); var pe2 = document.getElementById('pin-error'); if(pe2) pe2.textContent = ''; }, 800);
-}
-
-function pinPress(val) {
-  if (val === 'del') { pinInput = pinInput.slice(0,-1); updatePinDots(); return; }
-  if (pinInput.length >= 4) return;
-  pinInput += val;
-  updatePinDots();
-  if (pinInput.length === 4) {
-    if (pinInput === CORRECT_PIN) {
-      try { localStorage.setItem(PIN_KEY, '1'); } catch(e) {}
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('main-app').style.display = 'block';
-      if (window._appReady) window._appReady();
-    } else {
-      pinError();
-    }
-  }
-}
-
-function checkPin() {
-  try { return localStorage.getItem(PIN_KEY) === '1'; } catch(e) { return false; }
-}
-
-if (checkPin()) {
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    if (window._appReady) window._appReady();
-  });
-}
-</script>
-
-<!-- AUTH SCREEN -->
-
-<div id="auth-screen" class="auth-screen">
-  <div class="auth-logo">📊</div>
-  <div class="auth-title">Habits Creator</div>
-  <div class="auth-sub">Введи PIN для входа</div>
-  <div id="pin-dots" style="display:flex;gap:12px;margin-bottom:32px;">
-    <div class="pin-dot" id="dot-0"></div>
-    <div class="pin-dot" id="dot-1"></div>
-    <div class="pin-dot" id="dot-2"></div>
-    <div class="pin-dot" id="dot-3"></div>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;">
-    <button class="pin-btn" onclick="pinPress('1')">1</button>
-    <button class="pin-btn" onclick="pinPress('2')">2</button>
-    <button class="pin-btn" onclick="pinPress('3')">3</button>
-    <button class="pin-btn" onclick="pinPress('4')">4</button>
-    <button class="pin-btn" onclick="pinPress('5')">5</button>
-    <button class="pin-btn" onclick="pinPress('6')">6</button>
-    <button class="pin-btn" onclick="pinPress('7')">7</button>
-    <button class="pin-btn" onclick="pinPress('8')">8</button>
-    <button class="pin-btn" onclick="pinPress('9')">9</button>
-    <button class="pin-btn" onclick="pinPress('del')" style="font-size:18px;">⌫</button>
-    <button class="pin-btn" onclick="pinPress('0')">0</button>
-    <button class="pin-btn" style="opacity:0;" disabled></button>
-  </div>
-  <div id="pin-error" style="margin-top:16px;font-size:13px;color:#A32D2D;min-height:20px;"></div>
-</div>
-
-<!-- MAIN APP -->
-
-<div id="main-app" style="display:none;">
 <div class="app">
-  <div class="user-bar">
-    <div class="user-info">
-      <span class="user-name" id="user-name">Давид</span>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button class="edit-mode-btn" id="edit-mode-btn" onclick="toggleEditMode()">Редактировать</button>
-      <button class="logout-btn" onclick="signOut()">Выйти</button>
-    </div>
-  </div>
-
   <div class="tabs">
     <button class="tab active" onclick="showTab('today')">Сегодня</button>
     <button class="tab" onclick="showTab('stats')">Статистика</button>
@@ -275,11 +123,9 @@ if (checkPin()) {
     <button class="tab" onclick="showTab('history')">История</button>
   </div>
 
-  <!-- TAB TODAY -->
-
   <div id="tab-today">
     <div class="header">
-      <h1 id="header-name">Давид</h1>
+      <h1>Давид</h1>
       <div class="date" id="header-date"></div>
       <div class="day-nav">
         <button class="day-nav-btn" onclick="shiftDay(-1)">←</button>
@@ -288,16 +134,99 @@ if (checkPin()) {
       </div>
     </div>
     <div class="sync-status" id="sync-status"></div>
-    <div class="score-card">
-      <div class="score-big" id="today-score">0</div>
-      <div class="score-label">очков за этот день</div>
-      <div class="score-month"><span>За месяц</span><span id="month-score">0</span></div>
-    </div>
-    <div id="blocks-container"></div>
-    <button class="save-btn" onclick="saveDay()">Сохранить день</button>
-  </div>
 
-  <!-- TAB STATS -->
+```
+<div class="score-card">
+  <div class="score-big" id="today-score">0</div>
+  <div class="score-label">очков за этот день</div>
+  <div class="score-month"><span>За месяц</span><span id="month-score">0</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Спорт</div>
+  <div class="card">
+    <div class="row">
+      <div><div class="item-label">Тренировка</div><div class="item-sub" id="sport-sub">не отмечено · +10 очков</div></div>
+      <div class="btn-group">
+        <button class="btn" id="btn-yoga" onclick="setSport('yoga')">Йога</button>
+        <button class="btn" id="btn-pull" onclick="setSport('pull')">Турники</button>
+        <button class="btn" id="btn-basic" onclick="setSport('basic')">Запасной</button>
+      </div>
+    </div>
+    <div class="week-info"><span>Streak этой недели</span><span id="week-sport-count">0 / 5 · бонус +30</span></div>
+    <div class="week-labels"><div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div><div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div></div>
+    <div class="week-grid" id="sport-week"></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Counter-Strike</div>
+  <div class="card">
+    <div class="row">
+      <div><div class="item-label">Время в КС</div><div class="item-sub">лимит 1:30 · не играл +10</div></div>
+      <div class="btn-group">
+        <button class="btn" id="btn-cs-off" onclick="setCSoff()">Не играл</button>
+        <button class="btn" id="btn-cs-start" onclick="toggleTimer()">Старт</button>
+      </div>
+    </div>
+    <div class="cs-timer">
+      <div class="timer-display" id="timer-display">0:00</div>
+      <div class="timer-badge tok" id="timer-badge">готов</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="cs-progress" style="width:0%;background:#639922;"></div></div>
+    <div class="manual-row">
+      <span>Добавить вручную:</span>
+      <input type="number" id="cs-manual" min="1" max="300" placeholder="мин">
+      <button class="btn" onclick="addManualCS()" style="padding:6px 12px;">+ мин</button>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Трава (будние дни)</div>
+  <div class="card">
+    <div class="row">
+      <div><div class="item-label">Сегодня</div><div class="item-sub" id="weed-sub">чистый день = +20 в конце недели</div></div>
+      <div class="btn-group">
+        <button class="btn" id="btn-weed-no" onclick="setWeed('no')">Не курил</button>
+        <button class="btn" id="btn-weed-yes" onclick="setWeed('yes')">Курил</button>
+        <button class="btn" id="btn-weed-na" onclick="setWeed('na')">Выходной</button>
+      </div>
+    </div>
+    <div class="week-info"><span>Итог недели</span><span id="weed-week-pts">0 очков</span></div>
+    <div class="week-labels"><div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div><div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div></div>
+    <div class="week-grid" id="weed-week"></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Вечерняя активность</div>
+  <div class="card">
+    <div class="item-sub" style="margin-bottom:10px;">можно выбрать несколько</div>
+    <div class="evening-grid">
+      <button class="ev-btn" onclick="toggleEvening(this)">Монтаж</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Вайбкодинг</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Прогулка</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Друзья</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Звонки семье</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Чтение</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Фильм</button>
+      <button class="ev-btn" onclick="toggleEvening(this)">Другое</button>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Заметка</div>
+  <div class="card">
+    <textarea class="note-input" id="day-note" rows="2" placeholder="Как прошёл день..."></textarea>
+  </div>
+</div>
+
+<button class="save-btn" onclick="saveDay()">Сохранить день</button>
+```
+
+  </div>
 
   <div id="tab-stats" style="display:none;">
     <div class="header"><h1>Статистика</h1><div class="date" id="stats-month-label"></div></div>
@@ -317,34 +246,26 @@ if (checkPin()) {
     </div>
   </div>
 
-  <!-- TAB REWARDS -->
-
   <div id="tab-rewards" style="display:none;">
     <div class="header"><h1>Награды</h1><div class="date" id="rewards-month-label"></div></div>
-    <div class="score-card"><div class="score-big" id="rewards-score">0</div><div class="score-label">очков за месяц</div></div>
-    <div class="section"><div class="section-title">Цели</div><div class="card"><div class="rewards-list" id="rewards-list"></div></div></div>
+    <div class="score-card">
+      <div class="score-big" id="rewards-score">0</div>
+      <div class="score-label">очков за месяц</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Цели</div>
+      <div class="card"><div class="rewards-list" id="rewards-list"></div></div>
+    </div>
   </div>
-
-  <!-- TAB HISTORY -->
 
   <div id="tab-history" style="display:none;">
     <div class="header"><h1>История</h1><div class="date">последние 30 дней</div></div>
-    <div class="section"><div class="card"><div id="history-list"><div class="empty-state">Нет записей</div></div></div></div>
+    <div class="section">
+      <div class="card"><div id="history-list"><div class="empty-state">Нет записей</div></div></div>
+    </div>
     <button class="export-btn" onclick="exportCSV()">Экспорт в CSV</button>
   </div>
 </div>
-</div>
-
-<!-- EDIT PANEL -->
-
-<div class="edit-overlay" id="edit-overlay" style="display:none;" onclick="closeEditPanel(event)">
-  <div class="edit-panel" id="edit-panel">
-    <h3 id="edit-panel-title">Редактировать блок</h3>
-    <div id="edit-panel-body"></div>
-    <button class="edit-save-btn" onclick="saveBlockEdit()">Сохранить</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -362,104 +283,33 @@ const firebaseConfig = {
 
 const fbApp = initializeApp(firebaseConfig);
 const fsdb = getFirestore(fbApp);
-
 const USER_ID = 'david';
 
-const REWARDS = [
+var REWARDS = [
   { pts: 100, name: 'Минимальная планка' },
   { pts: 200, name: 'Фильм без угрызений совести' },
   { pts: 350, name: 'Покупка на себя' },
   { pts: 500, name: '1-2 свободных дня' },
   { pts: 700, name: 'Что угодно' }
 ];
-const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-const DAYS_RU = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+var MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+var DAYS_RU = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+var SPORT_LABELS = { yoga: 'Йога · +10', pull: 'Турники · +10', basic: 'Запасной · +10' };
 
-// DEFAULT BLOCKS CONFIG
-const DEFAULT_BLOCKS = [
-  {
-    id: 'sport', title: 'Спорт', visible: true,
-    type: 'buttons', // single select
-    options: [
-      { label: 'Йога', pts: 10 },
-      { label: 'Турники', pts: 10 },
-      { label: 'Запасной', pts: 10 }
-    ],
-    weekBonus: { days: 5, pts: 30 },
-    showWeek: true
-  },
-  {
-    id: 'cs', title: 'Counter-Strike', visible: true,
-    type: 'timer',
-    limitMin: 90,
-    ptsOff: 10, ptsOk: 5, ptsOver: -10
-  },
-  {
-    id: 'weed', title: 'Трава (будние дни)', visible: true,
-    type: 'buttons',
-    options: [
-      { label: 'Не курил', pts: 20, weekCount: true },
-      { label: 'Курил', pts: -10, penalty: true },
-      { label: 'Выходной', pts: 0 }
-    ],
-    showWeek: true,
-    weeklyCalc: true
-  },
-  {
-    id: 'evening', title: 'Вечерняя активность', visible: true,
-    type: 'multiselect',
-    options: [
-      { label: 'Монтаж', pts: 0 },
-      { label: 'Вайбкодинг', pts: 0 },
-      { label: 'Прогулка', pts: 0 },
-      { label: 'Друзья', pts: 0 },
-      { label: 'Звонки семье', pts: 0 },
-      { label: 'Чтение', pts: 0 },
-      { label: 'Фильм', pts: 0 },
-      { label: 'Другое', pts: 0 }
-    ]
-  },
-  {
-    id: 'note', title: 'Заметка', visible: true,
-    type: 'note'
-  }
-];
-
-let db = { monthScore: 0, monthKey: '', history: [], weekSport: {}, weekWeed: {}, weekKey: '', weekBonusGiven: false, blocks: null };
-let day = { sport: null, cs: 'none', csSeconds: 0, csRunning: false, evening: [], weed: null, note: '' };
-let dayOffset = 0;
-let timerInt = null;
-let editMode = false;
-let editingBlockId = null;
-let editingBlockData = null;
-let blocks = JSON.parse(JSON.stringify(DEFAULT_BLOCKS));
-
-// ── INIT ──
-function initApp() {
-  document.getElementById('user-name').textContent = 'Давид';
-  document.getElementById('header-name').textContent = 'Давид';
-  updateHeader();
-  updateDayNav();
-  cloudLoad();
-}
-
-window._appReady = initApp;
-
-window.signOut = function() {
-  if (confirm('Выйти?')) {
-    try { localStorage.removeItem('hc_pin_ok'); } catch(e) {}
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('main-app').style.display = 'none';
-  }
+var db = {
+  monthScore: 0, monthKey: '',
+  history: [],
+  weekSport: {}, weekWeed: {}, weekKey: '', weekBonusGiven: false
 };
 
-// if already past auth (auto-login happened before module loaded)
-if (document.getElementById('main-app').style.display === 'block') initApp();
+var day = { sport: null, cs: 'none', csSeconds: 0, csRunning: false, evening: [], weed: null, note: '' };
+var dayOffset = 0;
+var timerInt = null;
 
-// ── CLOUD ──
-function setSyncStatus(s, m) {
+function setSyncStatus(status, msg) {
   var el = document.getElementById('sync-status');
-  el.textContent = m; el.className = 'sync-status sync-' + s;
+  el.textContent = msg;
+  el.className = 'sync-status sync-' + status;
 }
 
 async function cloudLoad() {
@@ -473,34 +323,46 @@ async function cloudLoad() {
       if (!db.history) db.history = [];
       if (!db.weekSport) db.weekSport = {};
       if (!db.weekWeed) db.weekWeed = {};
-      if (db.blocks) blocks = db.blocks;
     }
     var mk = getMonthKey();
     if (db.monthKey !== mk) { db.monthScore = 0; db.monthKey = mk; }
     var wk = getWeekKey();
     if (db.weekKey !== wk) { db.weekSport = {}; db.weekWeed = {}; db.weekKey = wk; db.weekBonusGiven = false; }
+    localSave();
     setSyncStatus('ok', '✓ данные загружены');
-    setTimeout(() => { document.getElementById('sync-status').textContent = ''; }, 3000);
+    setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
   } catch(e) {
-    setSyncStatus('err', '⚠ ошибка загрузки');
+    localLoad();
+    setSyncStatus('err', '⚠ офлайн — данные локальные');
   }
-  renderBlocks();
-  loadDay(0);
   updateScores();
+  updateSportWeek();
+  updateWeedWeek();
+  loadDay(0);
 }
 
 async function cloudSave() {
+  localSave();
   setSyncStatus('pending', '↻ сохранение...');
   try {
-    db.blocks = blocks;
     var ref = doc(fsdb, 'trackers', USER_ID);
     await setDoc(ref, db);
-    setSyncStatus('ok', '✓ сохранено');
-    setTimeout(() => { document.getElementById('sync-status').textContent = ''; }, 3000);
-  } catch(e) { setSyncStatus('err', '⚠ ошибка сохранения'); }
+    setSyncStatus('ok', '✓ сохранено в облако');
+    setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
+  } catch(e) {
+    setSyncStatus('err', '⚠ сохранено локально (нет сети)');
+  }
 }
 
-// ── DATE ──
+function localSave() { try { localStorage.setItem('dtracker6', JSON.stringify(db)); } catch(e) {} }
+function localLoad() {
+  try { var s = localStorage.getItem('dtracker6'); if (s) db = Object.assign(db, JSON.parse(s)); } catch(e) {}
+  var mk = getMonthKey();
+  if (db.monthKey !== mk) { db.monthScore = 0; db.monthKey = mk; }
+  var wk = getWeekKey();
+  if (db.weekKey !== wk) { db.weekSport = {}; db.weekWeed = {}; db.weekKey = wk; db.weekBonusGiven = false; }
+}
+
 function getOffsetDate(off) { var d = new Date(); d.setDate(d.getDate() + off); return d; }
 function getDateStr(off) { return getOffsetDate(off).toISOString().split('T')[0]; }
 function getMonthKey() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
@@ -512,27 +374,19 @@ function getWeekKey() {
 function getDOW(off) { var d = getOffsetDate(off); var wd = d.getDay(); return wd === 0 ? 6 : wd - 1; }
 function fmtDate(str) { var p = str.split('-'); return parseInt(p[2]) + ' ' + MONTHS[parseInt(p[1])-1]; }
 
-// ── SCORE ──
 function calcScore() {
   var pts = 0;
-  if (day.sport !== null) {
-    var sb = blocks.find(b => b.id === 'sport');
-    if (sb) { var opt = sb.options.find(o => o.label === day.sport); if (opt) pts += opt.pts; }
-  }
+  if (day.sport) pts += 10;
   if (day.cs === 'off') pts += 10;
   else if (day.cs === 'ok') pts += 5;
   else if (day.cs === 'over') pts -= 10;
-  if (day.evening && day.evening.length) {
-    var eb = blocks.find(b => b.id === 'evening');
-    if (eb) day.evening.forEach(ev => { var opt = eb.options.find(o => o.label === ev); if (opt) pts += opt.pts; });
-  }
   return pts;
 }
 
 function showToast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
+  setTimeout(function() { t.classList.remove('show'); }, 2600);
 }
 
 function updateScores() {
@@ -557,540 +411,272 @@ function updateDayNav() {
   document.getElementById('btn-day-fwd').disabled = dayOffset === 0;
 }
 
-// ── RENDER BLOCKS ──
-function renderBlocks() {
-  var container = document.getElementById('blocks-container');
-  if (!container) return;
-  container.innerHTML = '';
-  var visible = blocks.filter(b => b.visible !== false);
-  visible.forEach((block, idx) => {
-    var section = document.createElement('div');
-    section.className = 'section';
-    section.dataset.blockId = block.id;
-
-    if (editMode) {
-      var editBar = document.createElement('div');
-      editBar.className = 'block-edit-bar';
-      editBar.innerHTML = `
-        <button class="block-order-btn" onclick="moveBlock('${block.id}',-1)" ${idx===0?'disabled':''}>↑</button>
-        <button class="block-order-btn" onclick="moveBlock('${block.id}',1)" ${idx===visible.length-1?'disabled':''}>↓</button>
-        <button class="block-edit-btn" onclick="openEditPanel('${block.id}')">✏️ Изменить</button>
-        <button class="block-hide-btn" onclick="hideBlock('${block.id}')">Скрыть</button>`;
-      section.appendChild(editBar);
-    }
-
-    var titleEl = document.createElement('div');
-    titleEl.className = 'section-title';
-    titleEl.textContent = block.title;
-    section.appendChild(titleEl);
-
-    var card = document.createElement('div');
-    card.className = 'card';
-
-    if (block.type === 'buttons' || block.type === 'multiselect') {
-      var isMulti = block.type === 'multiselect';
-      var grid = document.createElement('div');
-      grid.className = isMulti ? 'evening-grid' : '';
-
-      if (isMulti) {
-        var hint = document.createElement('div');
-        hint.className = 'item-sub'; hint.style.marginBottom = '10px';
-        hint.textContent = 'можно выбрать несколько';
-        card.appendChild(hint);
-      }
-
-      if (!isMulti) {
-        var rowDiv = document.createElement('div');
-        rowDiv.className = 'row';
-        var leftDiv = document.createElement('div');
-        leftDiv.innerHTML = '<div class="item-label">' + block.title + '</div><div class="item-sub" id="sub-'+block.id+'">не отмечено</div>';
-        var btnGroup = document.createElement('div');
-        btnGroup.className = 'btn-group';
-        block.options.forEach(opt => {
-          var b = document.createElement('button');
-          b.className = 'btn';
-          b.textContent = opt.label;
-          b.id = 'opt-' + block.id + '-' + opt.label.replace(/\s/g,'_');
-          b.onclick = () => selectOption(block.id, opt.label);
-          btnGroup.appendChild(b);
-        });
-        rowDiv.appendChild(leftDiv); rowDiv.appendChild(btnGroup);
-        card.appendChild(rowDiv);
-
-        if (block.showWeek) {
-          var wi = document.createElement('div'); wi.className = 'week-info';
-          var wLabel = block.weeklyCalc ? 'Итог недели' : 'Streak этой недели';
-          var wVal = block.weeklyCalc ? '0 очков' : '0 / ' + (block.weekBonus ? block.weekBonus.days : 5) + ' · бонус +' + (block.weekBonus ? block.weekBonus.pts : 30);
-          wi.innerHTML = '<span>' + wLabel + '</span><span id="week-val-'+block.id+'">' + wVal + '</span>';
-          card.appendChild(wi);
-          var wl = document.createElement('div'); wl.className = 'week-labels';
-          ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(d => { var dl = document.createElement('div'); dl.className = 'week-label'; dl.textContent = d; wl.appendChild(dl); });
-          var wg = document.createElement('div'); wg.className = 'week-grid'; wg.id = 'week-grid-'+block.id;
-          card.appendChild(wl); card.appendChild(wg);
-        }
-      } else {
-        block.options.forEach(opt => {
-          var b = document.createElement('button');
-          b.className = 'ev-btn';
-          b.textContent = opt.label;
-          b.id = 'opt-' + block.id + '-' + opt.label.replace(/\s/g,'_');
-          b.onclick = function(el) { return () => toggleMulti(block.id, opt.label); }(b);
-          grid.appendChild(b);
-        });
-        card.appendChild(grid);
-      }
-    } else if (block.type === 'timer') {
-      card.innerHTML = `
-        <div class="row">
-          <div><div class="item-label">Время в КС</div><div class="item-sub">лимит 1:30 · не играл +10</div></div>
-          <div class="btn-group">
-            <button class="btn" id="btn-cs-off" onclick="setCSoff()">Не играл</button>
-            <button class="btn" id="btn-cs-start" onclick="toggleTimer()">Старт</button>
-          </div>
-        </div>
-        <div class="cs-timer">
-          <div class="timer-display" id="timer-display">0:00</div>
-          <div class="timer-badge tok" id="timer-badge">готов</div>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="cs-progress" style="width:0%;background:#639922;"></div></div>
-        <div class="manual-row">
-          <span>Добавить вручную:</span>
-          <input type="number" id="cs-manual" min="1" max="300" placeholder="мин">
-          <button class="btn" onclick="addManualCS()" style="padding:6px 12px;">+ мин</button>
-        </div>`;
-    } else if (block.type === 'note') {
-      card.innerHTML = '<textarea class="note-input" id="day-note" rows="2" placeholder="Как прошёл день..."></textarea>';
-
-```
+function updateSportBtns() {
+  ['yoga','pull','basic'].forEach(function(t) { document.getElementById('btn-'+t).className = 'btn' + (day.sport === t ? ' ag' : ''); });
+  document.getElementById('sport-sub').textContent = day.sport ? SPORT_LABELS[day.sport] : 'не отмечено · +10 очков';
 }
 
-section.appendChild(card);
-container.appendChild(section);
-```
-
-});
-
-updateAllWeekGrids();
-restoreDayState();
+function updateCSBtns() {
+  document.getElementById('btn-cs-off').className = 'btn' + (day.cs === 'off' ? ' ag' : '');
+  var sb = document.getElementById('btn-cs-start');
+  sb.textContent = day.csRunning ? 'Пауза' : (day.csSeconds > 0 ? 'Продолжить' : 'Старт');
 }
 
-function restoreDayState() {
-// restore sport
-var sb = blocks.find(b => b.id === ‘sport’ && b.visible !== false);
-if (sb && day.sport) selectOption(‘sport’, day.sport, true);
-
-// restore cs
-if (day.cs === ‘off’) { var btn = document.getElementById(‘btn-cs-off’); if (btn) btn.className = ‘btn ag’; }
-updateTimer();
-
-// restore evening
-updateEveningBtns();
-
-// restore weed
-var wb = blocks.find(b => b.id === ‘weed’ && b.visible !== false);
-if (wb && day.weed) selectOption(‘weed’, day.weed, true);
-
-// restore note
-var noteEl = document.getElementById(‘day-note’);
-if (noteEl) noteEl.value = day.note || ‘’;
-
-updateScores();
-}
-
-function selectOption(blockId, label, silent) {
-var block = blocks.find(b => b.id === blockId);
-if (!block) return;
-
-if (blockId === ‘sport’) {
-day.sport = day.sport === label ? null : label;
-block.options.forEach(opt => {
-var el = document.getElementById(‘opt-sport-’ + opt.label.replace(/\s/g,’*’));
-if (el) el.className = ‘btn’ + (day.sport === opt.label ? ’ ag’ : ‘’);
-});
-var sub = document.getElementById(‘sub-sport’);
-if (sub) sub.textContent = day.sport ? day.sport + ’ · +’ + (block.options.find(o=>o.label===day.sport)||{pts:10}).pts + ’ очков’ : ‘не отмечено’;
-} else if (blockId === ‘weed’) {
-day.weed = day.weed === label ? null : label;
-block.options.forEach(opt => {
-var el = document.getElementById(‘opt-weed-’ + opt.label.replace(/\s/g,’*’));
-if (el) {
-var cls = opt.pts > 0 ? ’ ag’ : opt.pts < 0 ? ’ ar’ : ’ aa’;
-el.className = ‘btn’ + (day.weed === opt.label ? cls : ‘’);
-}
-});
-var sub2 = document.getElementById(‘sub-weed’);
-if (sub2) {
-var msgs = { ‘Не курил’: ‘+20 в конце недели’, ‘Курил’: ‘штраф в конце недели’, ‘Выходной’: ‘выходной, не считается’ };
-sub2.textContent = day.weed ? (msgs[day.weed] || day.weed) : ‘чистый день = +20 в конце недели’;
-}
-var d2 = getDOW(dayOffset);
-if (day.weed) db.weekWeed[‘d’+d2] = day.weed; else delete db.weekWeed[‘d’+d2];
-updateWeekGrid(‘weed’);
-}
-if (!silent) updateScores();
-}
-
-function toggleMulti(blockId, label) {
-if (blockId === ‘evening’) {
-var idx = day.evening.indexOf(label);
-if (idx === -1) day.evening.push(label); else day.evening.splice(idx, 1);
-updateEveningBtns();
-updateScores();
-}
+function updateTimer() {
+  var m = Math.floor(day.csSeconds / 60); var s = day.csSeconds % 60;
+  document.getElementById('timer-display').textContent = m + ':' + String(s).padStart(2,'0');
+  var limit = 90 * 60; var pct = Math.min(100, Math.round(day.csSeconds / limit * 100));
+  var bar = document.getElementById('cs-progress'); var badge = document.getElementById('timer-badge');
+  if (day.csSeconds === 0) {
+    bar.style.width = '0%'; bar.style.background = '#639922'; badge.textContent = 'готов'; badge.className = 'timer-badge tok';
+  } else if (day.csSeconds <= limit) {
+    bar.style.width = pct + '%'; bar.style.background = pct > 80 ? '#EF9F27' : '#639922';
+    badge.textContent = 'в лимите'; badge.className = 'timer-badge ' + (pct > 80 ? 'twarn' : 'tok'); day.cs = 'ok';
+  } else {
+    bar.style.width = '100%'; bar.style.background = '#E24B4A';
+    var over = day.csSeconds - limit; var om = Math.floor(over/60); var os = over%60;
+    badge.textContent = '+' + om + ':' + String(os).padStart(2,'0') + ' сверх';
+    badge.className = 'timer-badge tover'; day.cs = 'over';
+  }
+  updateScores();
 }
 
 function updateEveningBtns() {
-var eb = blocks.find(b => b.id === ‘evening’);
-if (!eb) return;
-eb.options.forEach(opt => {
-var el = document.getElementById(‘opt-evening-’ + opt.label.replace(/\s/g,’_’));
-if (el) el.className = day.evening.indexOf(opt.label) !== -1 ? ‘ev-btn sel’ : ‘ev-btn’;
-});
+  document.querySelectorAll('.ev-btn').forEach(function(b) {
+    b.className = day.evening.indexOf(b.textContent.trim()) !== -1 ? 'ev-btn sel' : 'ev-btn';
+  });
 }
 
-function updateAllWeekGrids() {
-updateWeekGrid(‘sport’);
-updateWeekGrid(‘weed’);
+function updateWeedBtns() {
+  ['no','yes','na'].forEach(function(v) {
+    var b = document.getElementById('btn-weed-'+v);
+    b.className = 'btn' + (day.weed === v ? (v==='no'?' ag':v==='yes'?' ar':' aa') : '');
+  });
+  var subs = { no:'+20 в конце недели', yes:'штраф в конце недели', na:'выходной, не считается' };
+  document.getElementById('weed-sub').textContent = subs[day.weed] || 'чистый день = +20 в конце недели';
 }
 
-function updateWeekGrid(blockId) {
-var grid = document.getElementById(‘week-grid-’ + blockId);
-if (!grid) return;
-grid.innerHTML = ‘’;
-if (blockId === ‘sport’) {
-var count = 0;
-for (var i = 0; i < 7; i++) {
-var d = document.createElement(‘div’);
-if (db.weekSport[‘d’+i]) { d.className = ‘wd done’; d.textContent = ‘+’; count++; }
-else { d.className = ‘wd empty’; d.textContent = ‘·’; }
-grid.appendChild(d);
-}
-var sb = blocks.find(b => b.id === ‘sport’);
-var bonusDays = sb && sb.weekBonus ? sb.weekBonus.days : 5;
-var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
-var wv = document.getElementById(‘week-val-sport’);
-if (wv) wv.textContent = count + ’ / ’ + bonusDays + ’ · бонус +’ + bonusPts;
-} else if (blockId === ‘weed’) {
-var pts = 0, misses = 0;
-for (var i = 0; i < 7; i++) {
-var d = document.createElement(‘div’); var v = db.weekWeed[‘d’+i];
-if (v === ‘Не курил’) { d.className = ‘wd done’; d.textContent = ‘+’; pts += 20; }
-else if (v === ‘Курил’) { d.className = ‘wd miss’; d.textContent = ‘×’; misses++; pts -= 10 + Math.max(0,(misses-1)*5); }
-else { d.className = ‘wd empty’; d.textContent = ‘·’; }
-grid.appendChild(d);
-}
-var wv2 = document.getElementById(‘week-val-weed’);
-if (wv2) wv2.textContent = pts + ’ очков’;
-}
+function updateSportWeek() {
+  var grid = document.getElementById('sport-week'); if (!grid) return;
+  grid.innerHTML = ''; var count = 0;
+  for (var i = 0; i < 7; i++) {
+    var d = document.createElement('div');
+    if (db.weekSport['d'+i]) { d.className = 'wd done'; d.textContent = '+'; count++; }
+    else { d.className = 'wd empty'; d.textContent = '·'; }
+    grid.appendChild(d);
+  }
+  document.getElementById('week-sport-count').textContent = count + ' / 5 · бонус +30';
 }
 
-// ── CS TIMER ──
-function updateTimer() {
-var el = document.getElementById(‘timer-display’);
-var badge = document.getElementById(‘timer-badge’);
-var bar = document.getElementById(‘cs-progress’);
-if (!el) return;
-var m = Math.floor(day.csSeconds / 60); var s = day.csSeconds % 60;
-el.textContent = m + ‘:’ + String(s).padStart(2,‘0’);
-var limit = 90 * 60; var pct = Math.min(100, Math.round(day.csSeconds / limit * 100));
-if (day.csSeconds === 0) {
-bar.style.width = ‘0%’; bar.style.background = ‘#639922’;
-badge.textContent = ‘готов’; badge.className = ‘timer-badge tok’;
-} else if (day.csSeconds <= limit) {
-bar.style.width = pct + ‘%’; bar.style.background = pct > 80 ? ‘#EF9F27’ : ‘#639922’;
-badge.textContent = ‘в лимите’; badge.className = ‘timer-badge ’ + (pct > 80 ? ‘twarn’ : ‘tok’);
-day.cs = ‘ok’;
-} else {
-bar.style.width = ‘100%’; bar.style.background = ‘#E24B4A’;
-var over = day.csSeconds - limit; var om = Math.floor(over/60); var os = over%60;
-badge.textContent = ‘+’ + om + ‘:’ + String(os).padStart(2,‘0’) + ’ сверх’;
-badge.className = ‘timer-badge tover’; day.cs = ‘over’;
-}
-updateScores();
+function calcWeedPts() {
+  var pts = 0, misses = 0;
+  for (var i = 0; i < 5; i++) {
+    var v = db.weekWeed['d'+i];
+    if (v === 'no') pts += 20; else if (v === 'yes') { misses++; pts -= 10 + Math.max(0,(misses-1)*5); }
+  }
+  return pts;
 }
 
-window.setCSoff = function() {
-clearInterval(timerInt); timerInt = null;
-day.cs = ‘off’; day.csSeconds = 0; day.csRunning = false;
-var btn = document.getElementById(‘btn-cs-off’); if (btn) btn.className = ‘btn ag’;
-var sb = document.getElementById(‘btn-cs-start’); if (sb) { sb.textContent = ‘Старт’; sb.className = ‘btn’; }
-updateTimer(); updateScores();
-};
-window.toggleTimer = function() {
-var offBtn = document.getElementById(‘btn-cs-off’); if (offBtn) offBtn.className = ‘btn’;
-if (day.cs === ‘off’) day.cs = ‘none’;
-if (day.csRunning) { clearInterval(timerInt); timerInt = null; day.csRunning = false; }
-else { day.csRunning = true; timerInt = setInterval(() => { day.csSeconds++; updateTimer(); }, 1000); }
-var sb = document.getElementById(‘btn-cs-start’);
-if (sb) sb.textContent = day.csRunning ? ‘Пауза’ : (day.csSeconds > 0 ? ‘Продолжить’ : ‘Старт’);
-};
-window.addManualCS = function() {
-var inp = document.getElementById(‘cs-manual’); var mins = parseInt(inp.value);
-if (!mins || mins < 1) return;
-if (day.cs === ‘off’) day.cs = ‘none’;
-var offBtn = document.getElementById(‘btn-cs-off’); if (offBtn) offBtn.className = ‘btn’;
-day.csSeconds += mins * 60; inp.value = ‘’;
-updateTimer(); updateScores();
-};
+function updateWeedWeek() {
+  var grid = document.getElementById('weed-week'); if (!grid) return;
+  grid.innerHTML = '';
+  for (var i = 0; i < 7; i++) {
+    var d = document.createElement('div'); var v = db.weekWeed['d'+i];
+    if (v === 'no') { d.className = 'wd done'; d.textContent = '+'; }
+    else if (v === 'yes') { d.className = 'wd miss'; d.textContent = '×'; }
+    else { d.className = 'wd empty'; d.textContent = '·'; }
+    grid.appendChild(d);
+  }
+  document.getElementById('weed-week-pts').textContent = calcWeedPts() + ' очков';
+}
 
-// ── LOAD DAY ──
 function loadDay(off) {
-clearInterval(timerInt); timerInt = null;
-var entry = db.history.find(h => h.date === getDateStr(off));
-day.sport = entry ? entry.sport : null;
-day.cs = entry ? entry.cs : ‘none’;
-day.csSeconds = entry ? (entry.csSeconds || 0) : 0;
-day.csRunning = false;
-day.evening = entry ? (Array.isArray(entry.evening) ? entry.evening : (entry.evening ? [entry.evening] : [])) : [];
-day.weed = entry ? entry.weed : null;
-day.note = entry ? (entry.note || ‘’) : ‘’;
-restoreDayState();
+  clearInterval(timerInt); timerInt = null;
+  var entry = null;
+  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === getDateStr(off)) { entry = db.history[i]; break; } }
+  day.sport = entry ? entry.sport : null;
+  day.cs = entry ? entry.cs : 'none';
+  day.csSeconds = entry ? (entry.csSeconds || 0) : 0;
+  day.csRunning = false;
+  day.evening = entry ? (Array.isArray(entry.evening) ? entry.evening : (entry.evening ? [entry.evening] : [])) : [];
+  day.weed = entry ? entry.weed : null;
+  day.note = entry ? (entry.note || '') : '';
+  document.getElementById('day-note').value = day.note;
+  updateSportBtns(); updateCSBtns(); updateTimer(); updateEveningBtns(); updateWeedBtns(); updateScores();
 }
 
 window.shiftDay = function(dir) {
-var next = dayOffset + dir; if (next > 0) return;
-dayOffset = next; loadDay(dayOffset); updateDayNav();
+  var next = dayOffset + dir; if (next > 0) return;
+  dayOffset = next; loadDay(dayOffset); updateDayNav();
 };
-
-// ── SAVE ──
+window.setSport = function(type) { day.sport = day.sport === type ? null : type; updateSportBtns(); updateScores(); };
+window.setCSoff = function() {
+  clearInterval(timerInt); timerInt = null;
+  day.cs = 'off'; day.csSeconds = 0; day.csRunning = false;
+  updateCSBtns(); updateTimer(); updateScores();
+};
+window.toggleTimer = function() {
+  document.getElementById('btn-cs-off').className = 'btn';
+  if (day.cs === 'off') day.cs = 'none';
+  if (day.csRunning) { clearInterval(timerInt); timerInt = null; day.csRunning = false; }
+  else { day.csRunning = true; timerInt = setInterval(function() { day.csSeconds++; updateTimer(); }, 1000); }
+  updateCSBtns();
+};
+window.addManualCS = function() {
+  var inp = document.getElementById('cs-manual'); var mins = parseInt(inp.value);
+  if (!mins || mins < 1) return;
+  if (day.cs === 'off') day.cs = 'none';
+  document.getElementById('btn-cs-off').className = 'btn';
+  day.csSeconds += mins * 60; inp.value = '';
+  updateTimer(); updateCSBtns();
+};
+window.toggleEvening = function(el) {
+  var activity = el.textContent.trim();
+  var idx = day.evening.indexOf(activity);
+  if (idx === -1) day.evening.push(activity); else day.evening.splice(idx, 1);
+  updateEveningBtns();
+};
+window.setWeed = function(val) {
+  day.weed = day.weed === val ? null : val;
+  var d = getDOW(dayOffset);
+  if (day.weed) db.weekWeed['d'+d] = day.weed; else delete db.weekWeed['d'+d];
+  updateWeedBtns(); updateWeedWeek();
+};
 window.saveDay = async function() {
-var noteEl = document.getElementById(‘day-note’);
-day.note = noteEl ? noteEl.value.trim() : ‘’;
-var pts = calcScore();
-var today = getDateStr(dayOffset);
-var d = getDOW(dayOffset);
-if (day.sport) db.weekSport[‘d’+d] = true;
-if (day.weed) db.weekWeed[‘d’+d] = day.weed;
-var sb = blocks.find(b => b.id === ‘sport’);
-var bonusDays = sb && sb.weekBonus ? sb.weekBonus.days : 5;
-var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
-var sportCount = Object.values(db.weekSport).filter(Boolean).length;
-var bonus = 0;
-if (sportCount >= bonusDays && !db.weekBonusGiven) { bonus = bonusPts; db.weekBonusGiven = true; }
-var entry = { date: today, sport: day.sport, cs: day.cs, csSeconds: day.csSeconds, evening: day.evening.slice(), weed: day.weed, note: day.note, pts };
-var idx = db.history.findIndex(h => h.date === today);
-if (idx >= 0) { db.monthScore = Math.max(0, db.monthScore + pts - db.history[idx].pts); db.history[idx] = entry; }
-else { db.monthScore += pts; db.history.push(entry); }
-if (bonus > 0) db.monthScore += bonus;
-updateScores(); updateAllWeekGrids();
-await cloudSave();
-showToast(bonus > 0 ? ‘Сохранено · +’ + pts + ’ + бонус +’ + bonusPts + ‘!’ : ‘Сохранено · ’ + (pts >= 0 ? ‘+’ : ‘’) + pts + ’ очков’);
+  day.note = document.getElementById('day-note').value.trim();
+  var pts = calcScore();
+  var today = getDateStr(dayOffset);
+  var d = getDOW(dayOffset);
+  if (day.sport) db.weekSport['d'+d] = true;
+  if (day.weed) db.weekWeed['d'+d] = day.weed;
+  var sportCount = Object.values(db.weekSport).filter(Boolean).length;
+  var bonus = 0;
+  if (sportCount >= 5 && !db.weekBonusGiven) { bonus = 30; db.weekBonusGiven = true; }
+  var entry = { date: today, sport: day.sport, cs: day.cs, csSeconds: day.csSeconds, evening: day.evening.slice(), weed: day.weed, note: day.note, pts: pts };
+  var idx = -1;
+  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === today) { idx = i; break; } }
+  if (idx >= 0) { db.monthScore = Math.max(0, db.monthScore + pts - db.history[idx].pts); db.history[idx] = entry; }
+  else { db.monthScore += pts; db.history.push(entry); }
+  if (bonus > 0) db.monthScore += bonus;
+  updateScores(); updateSportWeek(); updateWeedWeek();
+  await cloudSave();
+  showToast(bonus > 0 ? 'Сохранено · +' + pts + ' оч. + бонус +30!' : 'Сохранено · ' + (pts >= 0 ? '+' : '') + pts + ' очков');
 };
 
-// ── EDIT MODE ──
-window.toggleEditMode = function() {
-editMode = !editMode;
-var btn = document.getElementById(‘edit-mode-btn’);
-btn.textContent = editMode ? ‘Готово’ : ‘Редактировать’;
-btn.className = editMode ? ‘edit-mode-btn active’ : ‘edit-mode-btn’;
-renderBlocks();
-};
-
-window.moveBlock = function(blockId, dir) {
-var visibleBlocks = blocks.filter(b => b.visible !== false);
-var visIdx = visibleBlocks.findIndex(b => b.id === blockId);
-var newVisIdx = visIdx + dir;
-if (newVisIdx < 0 || newVisIdx >= visibleBlocks.length) return;
-var allIdx = blocks.findIndex(b => b.id === blockId);
-var swapId = visibleBlocks[newVisIdx].id;
-var swapAllIdx = blocks.findIndex(b => b.id === swapId);
-var tmp = blocks[allIdx]; blocks[allIdx] = blocks[swapAllIdx]; blocks[swapAllIdx] = tmp;
-renderBlocks();
-};
-
-window.hideBlock = function(blockId) {
-var b = blocks.find(b => b.id === blockId);
-if (b) { b.visible = false; renderBlocks(); }
-};
-
-window.openEditPanel = function(blockId) {
-var block = blocks.find(b => b.id === blockId);
-if (!block) return;
-editingBlockId = blockId;
-editingBlockData = JSON.parse(JSON.stringify(block));
-document.getElementById(‘edit-panel-title’).textContent = ’Редактировать: ’ + block.title;
-var body = document.getElementById(‘edit-panel-body’);
-
-if (block.type === ‘timer’ || block.type === ‘note’) {
-body.innerHTML = ‘<p style="color:#888;font-size:13px;">Этот блок нельзя редактировать</p>’;
-} else {
-var html = ‘<div style="font-size:12px;color:#999;margin-bottom:12px;">Название · Очки за выполнение</div>’;
-body.innerHTML = html;
-block.options.forEach((opt, i) => {
-var row = document.createElement(‘div’);
-row.className = ‘edit-item-row’;
-row.innerHTML = ` <input type="text" value="${opt.label}" onchange="updateEditOption(${i},'label',this.value)" placeholder="Название"> <input type="number" value="${opt.pts}" onchange="updateEditOption(${i},'pts',parseInt(this.value)||0)" style="width:60px;"> <span class="edit-pts-label">оч.</span> <button class="edit-del-btn" onclick="removeEditOption(${i})">✕</button>`;
-body.appendChild(row);
-});
-var addBtn = document.createElement(‘button’);
-addBtn.className = ‘edit-add-btn’;
-addBtn.textContent = ‘+ Добавить вариант’;
-addBtn.onclick = addEditOption;
-body.appendChild(addBtn);
-
-```
-if (block.weekBonus) {
-  var bonusDiv = document.createElement('div');
-  bonusDiv.style.marginTop = '16px';
-  bonusDiv.innerHTML = `<div style="font-size:12px;color:#999;margin-bottom:8px;">Недельный бонус</div>
-    <div class="edit-item-row">
-      <span style="font-size:13px;color:#555;">Дней для бонуса:</span>
-      <input type="number" value="${block.weekBonus.days}" onchange="updateWeekBonus('days',parseInt(this.value)||5)" style="width:60px;">
-      <span class="edit-pts-label">дн.</span>
-    </div>
-    <div class="edit-item-row" style="margin-top:6px;">
-      <span style="font-size:13px;color:#555;">Очков за бонус:</span>
-      <input type="number" value="${block.weekBonus.pts}" onchange="updateWeekBonus('pts',parseInt(this.value)||30)" style="width:60px;">
-      <span class="edit-pts-label">оч.</span>
-    </div>`;
-  body.appendChild(bonusDiv);
-}
-```
-
-}
-document.getElementById(‘edit-overlay’).style.display = ‘flex’;
-};
-
-window.updateEditOption = function(idx, field, val) {
-if (editingBlockData && editingBlockData.options[idx]) editingBlockData.options[idx][field] = val;
-};
-window.removeEditOption = function(idx) {
-if (editingBlockData) { editingBlockData.options.splice(idx, 1); openEditPanel(editingBlockId); }
-};
-window.addEditOption = function() {
-if (editingBlockData) { editingBlockData.options.push({ label: ‘Новый’, pts: 0 }); openEditPanel(editingBlockId); }
-};
-window.updateWeekBonus = function(field, val) {
-if (editingBlockData && editingBlockData.weekBonus) editingBlockData.weekBonus[field] = val;
-};
-
-window.saveBlockEdit = function() {
-var idx = blocks.findIndex(b => b.id === editingBlockId);
-if (idx >= 0 && editingBlockData) blocks[idx] = editingBlockData;
-closeEditPanel();
-renderBlocks();
-};
-
-window.closeEditPanel = function(e) {
-if (e && e.target !== document.getElementById(‘edit-overlay’)) return;
-document.getElementById(‘edit-overlay’).style.display = ‘none’;
-editingBlockId = null; editingBlockData = null;
-};
-
-// ── REWARDS & HISTORY ──
 function renderRewards() {
-var list = document.getElementById(‘rewards-list’); if (!list) return;
-list.innerHTML = REWARDS.map(r => {
-var done = db.monthScore >= r.pts; var pct = Math.min(100, Math.round(db.monthScore / r.pts * 100));
-return `<div class="reward-row"><div class="reward-header"><span class="reward-name${done?' done':''}">${done?'✓ ':''}${r.name}</span><span class="reward-pts${done?' done':''}">${r.pts} оч.</span></div><div class="reward-bar-wrap"><div class="reward-bar-fill${done?' done':''}" style="width:${pct}%"></div></div></div>`;
-}).join(’’);
+  var list = document.getElementById('rewards-list'); if (!list) return;
+  list.innerHTML = REWARDS.map(function(r) {
+    var done = db.monthScore >= r.pts; var pct = Math.min(100, Math.round(db.monthScore / r.pts * 100));
+    return '<div class="reward-row"><div class="reward-header"><span class="reward-name'+(done?' done':'')+'">'+( done?'✓ ':'')+r.name+'</span><span class="reward-pts'+(done?' done':'')+'">' +r.pts+' оч.</span></div><div class="reward-bar-wrap"><div class="reward-bar-fill'+(done?' done':'')+'" style="width:'+pct+'%"></div></div></div>';
+  }).join('');
 }
 
 function renderHistory() {
-var list = document.getElementById(‘history-list’); if (!list) return;
-if (!db.history.length) { list.innerHTML = ‘<div class="empty-state">Нет записей</div>’; return; }
-var CL = { off:‘нет’, ok:‘лимит’, over:‘перебор’, none:’—’ };
-list.innerHTML = db.history.slice(-30).reverse().map(h => {
-var ev = Array.isArray(h.evening) ? h.evening.join(’, ‘) : (h.evening || ‘—’);
-var noteHtml = h.note ? `<div class="history-note">${h.note}</div>` : ‘’;
-return `<div class="history-row"><div class="history-top"><div> <div class="history-date">${fmtDate(h.date)}</div> <div class="history-detail">${h.sport||'—'} · КС: ${CL[h.cs]||'—'}</div> <div class="history-detail">${ev}</div>${noteHtml} </div><div style="display:flex;align-items:center;gap:10px;"> <div class="history-pts ${h.pts>=0?'pos':'neg'}">${h.pts>=0?'+':''}${h.pts}</div> <button onclick="deleteDay('${h.date}')" style="background:none;border:none;font-size:16px;color:#ccc;cursor:pointer;padding:4px;">✕</button> </div></div></div>`;
-}).join(’’);
+  var list = document.getElementById('history-list'); if (!list) return;
+  if (!db.history.length) { list.innerHTML = '<div class="empty-state">Нет записей</div>'; return; }
+  var SL = { yoga:'Йога', pull:'Турники', basic:'Запасной' };
+  var CL = { off:'нет', ok:'лимит', over:'перебор', none:'—' };
+  var rows = db.history.slice(-30).reverse();
+  list.innerHTML = rows.map(function(h) {
+    var ev = Array.isArray(h.evening) ? h.evening.join(', ') : (h.evening || '—');
+    var noteHtml = h.note ? '<div class="history-note">' + h.note + '</div>' : '';
+    return '<div class="history-row"><div class="history-top"><div><div class="history-date">'+fmtDate(h.date)+'</div><div class="history-detail">'+(SL[h.sport]||'—')+' · КС: '+(CL[h.cs]||'—')+'</div><div class="history-detail">'+ev+'</div>'+noteHtml+'</div><div style="display:flex;align-items:center;gap:10px;"><div class="history-pts '+(h.pts>=0?'pos':'neg')+'">'+(h.pts>=0?'+':'')+h.pts+'</div><button onclick="deleteDay(\''+h.date+'\')" style="background:none;border:none;font-size:16px;color:#ccc;cursor:pointer;padding:4px;line-height:1;">✕</button></div></div></div>';
+  }).join('');
 }
 
 window.deleteDay = async function(dateStr) {
-if (!confirm(’Удалить запись за ’ + fmtDate(dateStr) + ‘?’)) return;
-var idx = db.history.findIndex(h => h.date === dateStr);
-if (idx === -1) return;
-db.history.splice(idx, 1);
-var wk = getWeekKey();
-db.weekSport = {}; db.weekWeed = {}; db.weekBonusGiven = false;
-db.history.filter(h => h.date >= wk).forEach(h => {
-var d = new Date(h.date); var wd = d.getDay(); var dow = wd === 0 ? 6 : wd - 1;
-if (h.sport) db.weekSport[‘d’+dow] = true;
-if (h.weed) db.weekWeed[‘d’+dow] = h.weed;
-});
-var sportCount = Object.values(db.weekSport).filter(Boolean).length;
-var sb = blocks.find(b => b.id === ‘sport’);
-if (sportCount >= (sb && sb.weekBonus ? sb.weekBonus.days : 5)) db.weekBonusGiven = true;
-var mk = getMonthKey();
-db.monthScore = db.history.filter(h => h.date.startsWith(mk)).reduce((a,h) => a+h.pts, 0);
-await cloudSave();
-renderHistory(); updateScores(); updateAllWeekGrids();
-showToast(‘Запись удалена’);
+  if (!confirm('Удалить запись за ' + fmtDate(dateStr) + '?')) return;
+  var idx = -1;
+  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === dateStr) { idx = i; break; } }
+  if (idx === -1) return;
+  var pts = db.history[idx].pts;
+  db.monthScore = Math.max(0, db.monthScore - pts);
+  db.history.splice(idx, 1);
+  await cloudSave();
+  renderHistory();
+  updateScores();
+  showToast('Запись удалена');
 };
 
 function renderStats() {
-var d = new Date(); var mk = d.getFullYear() + ‘-’ + String(d.getMonth()+1).padStart(2,‘0’);
-var me = db.history.filter(h => h.date.startsWith(mk));
-var sg = document.getElementById(‘stats-grid’); if (!sg) return;
-sg.innerHTML = [
-{ val: me.length, label: ‘Дней записано’ },
-{ val: me.filter(h=>h.sport).length, label: ‘Дней спорта’ },
-{ val: me.filter(h=>h.cs===‘ok’||h.cs===‘off’).length, label: ‘КС в лимите’ },
-{ val: me.filter(h=>h.weed===‘Не курил’).length + ’ / ’ + me.length, label: ‘Без травы (будн.)’ }
-].map(s => `<div class="stat-card"><div class="stat-val">${s.val}</div><div class="stat-label">${s.label}</div></div>`).join(’’);
-renderCalendar(); renderWeekSummary();
+  var d = new Date(); var mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  var me = db.history.filter(function(h) { return h.date.startsWith(mk); });
+  var sg = document.getElementById('stats-grid'); if (!sg) return;
+  sg.innerHTML = [
+    { val: me.length, label: 'Дней записано' },
+    { val: me.filter(function(h){return h.sport;}).length, label: 'Дней спорта' },
+    { val: me.filter(function(h){return h.cs==='ok'||h.cs==='off';}).length, label: 'КС в лимите' },
+    { val: me.filter(function(h){return h.weed==='no';}).length + ' / ' + me.length, label: 'Без травы (будн.)' }
+  ].map(function(s) { return '<div class="stat-card"><div class="stat-val">'+s.val+'</div><div class="stat-label">'+s.label+'</div></div>'; }).join('');
+  renderCalendar(); renderWeekSummary();
 }
 
 function renderCalendar() {
-var grid = document.getElementById(‘cal-grid’); if (!grid) return;
-var d = new Date(); var year = d.getFullYear(); var month = d.getMonth(); var today = d.getDate();
-var firstDay = new Date(year, month, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1;
-var daysInMonth = new Date(year, month+1, 0).getDate();
-var mk = year + ‘-’ + String(month+1).padStart(2,‘0’);
-var entryMap = {};
-db.history.filter(h=>h.date.startsWith(mk)).forEach(h=>{ entryMap[parseInt(h.date.split(’-’)[2])] = h.pts; });
-var html = ‘’;
-for (var i = 0; i < firstDay; i++) html += ‘<div class="cal-day filler"></div>’;
-for (var i = 1; i <= daysInMonth; i++) {
-var pts = entryMap[i]; var cls = ‘cal-day’;
-if (pts !== undefined) cls += pts >= 0 ? ’ has-data’ : ’ has-data neg’; else cls += ’ empty-day’;
-if (i === today) cls += ’ today-dot’;
-html += `<div class="${cls}">${pts !== undefined ? (pts>0?'+':'')+pts : i}</div>`;
-}
-grid.innerHTML = html;
+  var grid = document.getElementById('cal-grid'); if (!grid) return;
+  var d = new Date(); var year = d.getFullYear(); var month = d.getMonth(); var today = d.getDate();
+  var firstDay = new Date(year, month, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1;
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+  var mk = year + '-' + String(month+1).padStart(2,'0');
+  var entryMap = {};
+  db.history.filter(function(h){return h.date.startsWith(mk);}).forEach(function(h){ entryMap[parseInt(h.date.split('-')[2])] = h.pts; });
+  var html = '';
+  for (var i = 0; i < firstDay; i++) html += '<div class="cal-day filler"></div>';
+  for (var i = 1; i <= daysInMonth; i++) {
+    var pts = entryMap[i]; var cls = 'cal-day';
+    if (pts !== undefined) cls += pts >= 0 ? ' has-data' : ' has-data neg';
+    else cls += ' empty-day';
+    if (i === today) cls += ' today-dot';
+    html += '<div class="'+cls+'">'+(pts !== undefined ? (pts>0?'+':'')+pts : i)+'</div>';
+  }
+  grid.innerHTML = html;
 }
 
 function renderWeekSummary() {
-var ws = document.getElementById(‘week-summary’); if (!ws) return;
-var sportCount = Object.values(db.weekSport).filter(Boolean).length;
-var sb = blocks.find(b => b.id === ‘sport’);
-var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
-var sportPts = sportCount * 10 + (db.weekBonusGiven ? bonusPts : 0);
-var wk = getWeekKey();
-var weedPts = 0, misses = 0;
-for (var i = 0; i < 5; i++) { var v = db.weekWeed[‘d’+i]; if (v===‘Не курил’) weedPts+=20; else if (v===‘Курил’) { misses++; weedPts -= 10+Math.max(0,(misses-1)*5); } }
-var csPts = db.history.filter(h=>h.date>=wk).reduce((a,h)=>{ if(h.cs===‘off’) return a+10; if(h.cs===‘ok’) return a+5; if(h.cs===‘over’) return a-10; return a; }, 0);
-var total = sportPts + csPts + weedPts;
-ws.innerHTML = ‘<div class="week-summary-title">Неделя с ’ + fmtDate(wk) + ‘</div>’ +
-[[‘Спорт’, sportCount+’/5 · ‘+sportPts+’ оч.’],[‘КС’, csPts+’ оч.’],[‘Трава’, weedPts+’ оч.’],[‘Итого’, total+’ оч.’]].map(r=>`<div class="week-summary-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join(’’);
+  var ws = document.getElementById('week-summary'); if (!ws) return;
+  var sportCount = Object.values(db.weekSport).filter(Boolean).length;
+  var weedPts = calcWeedPts();
+  var sportPts = sportCount * 10 + (db.weekBonusGiven ? 30 : 0);
+  var wk = getWeekKey();
+  var csPts = db.history.filter(function(h){return h.date>=wk;}).reduce(function(a,h){
+    if(h.cs==='off') return a+10; if(h.cs==='ok') return a+5; if(h.cs==='over') return a-10; return a;
+  }, 0);
+  var total = sportPts + csPts + weedPts;
+  ws.innerHTML = '<div class="week-summary-title">Неделя с ' + fmtDate(wk) + '</div>' +
+    [['Спорт', sportCount+'/5 · '+sportPts+' оч.'],['КС', csPts+' оч.'],['Трава', weedPts+' оч.'],['Итого', total+' оч.']].map(function(r){
+      return '<div class="week-summary-row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';
+    }).join('');
 }
 
 window.exportCSV = function() {
-if (!db.history.length) { showToast(‘Нет данных’); return; }
-var CL = { off:‘не играл’, ok:‘в лимите’, over:‘перебор’, none:’—’ };
-var rows = [‘Дата,Спорт,КС,Активность,Трава,Очки,Заметка’];
-db.history.forEach(h => {
-var ev = Array.isArray(h.evening) ? h.evening.join(’|’) : (h.evening||’’);
-rows.push([h.date, h.sport||’—’, CL[h.cs]||’—’, ev, h.weed||’—’, h.pts, (h.note||’’).replace(/,/g,’ ‘)].join(’,’));
-});
-var blob = new Blob([rows.join(’\n’)],{type:‘text/csv;charset=utf-8;’});
-var url = URL.createObjectURL(blob); var a = document.createElement(‘a’);
-a.href = url; a.download = ‘tracker_’+getMonthKey()+’.csv’; a.click(); URL.revokeObjectURL(url);
-showToast(‘CSV скачан’);
+  if (!db.history.length) { showToast('Нет данных'); return; }
+  var SL = { yoga:'Йога', pull:'Турники', basic:'Запасной' };
+  var CL = { off:'не играл', ok:'в лимите', over:'перебор', none:'—' };
+  var rows = ['Дата,Спорт,КС,Активность,Трава,Очки,Заметка'];
+  db.history.forEach(function(h) {
+    var ev = Array.isArray(h.evening) ? h.evening.join('|') : (h.evening||'');
+    rows.push([h.date,SL[h.sport]||'—',CL[h.cs]||'—',ev,h.weed||'—',h.pts,(h.note||'').replace(/,/g,' ')].join(','));
+  });
+  var blob = new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob); var a = document.createElement('a');
+  a.href = url; a.download = 'tracker_'+getMonthKey()+'.csv'; a.click(); URL.revokeObjectURL(url);
+  showToast('CSV скачан');
 };
 
 window.showTab = function(tab) {
-[‘today’,‘stats’,‘rewards’,‘history’].forEach(t => {
-document.getElementById(‘tab-’+t).style.display = t===tab ? ‘block’ : ‘none’;
-});
-document.querySelectorAll(’.tab’).forEach((el,i) => {
-el.className = [‘today’,‘stats’,‘rewards’,‘history’][i]===tab ? ‘tab active’ : ‘tab’;
-});
-if (tab===‘rewards’) renderRewards();
-if (tab===‘history’) renderHistory();
-if (tab===‘stats’) renderStats();
+  ['today','stats','rewards','history'].forEach(function(t){
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(function(el,i){
+    el.className = ['today','stats','rewards','history'][i]===tab ? 'tab active' : 'tab';
+  });
+  if (tab==='rewards') renderRewards();
+  if (tab==='history') renderHistory();
+  if (tab==='stats') renderStats();
 };
+
+updateHeader();
+updateDayNav();
+cloudLoad();
 </script>
 
 </body>
