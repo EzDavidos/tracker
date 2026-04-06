@@ -25,6 +25,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .score-label { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
 .score-month { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; display: flex; justify-content: space-between; }
 .score-month span:last-child { color: #fff; font-weight: 600; }
+.sync-status { font-size: 11px; text-align: center; margin-top: 8px; padding: 4px 0; }
+.sync-ok { color: #3B6D11; }
+.sync-pending { color: #854F0B; }
+.sync-err { color: #A32D2D; }
 .section { margin-bottom: 16px; }
 .section-title { font-size: 11px; color: #999; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; padding-left: 2px; }
 .card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 10px; }
@@ -92,7 +96,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .stat-label { font-size: 11px; color: #999; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .cal-label { text-align: center; font-size: 10px; color: #bbb; font-weight: 500; margin-bottom: 4px; }
-.cal-day { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; }
+.cal-day { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
 .cal-day.has-data { background: #EAF3DE; color: #3B6D11; }
 .cal-day.has-data.neg { background: #FCEBEB; color: #A32D2D; }
 .cal-day.today-dot { border: 2px solid #1a1a1a; }
@@ -112,15 +116,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </head>
 <body>
 <div class="app">
-
   <div class="tabs">
     <button class="tab active" onclick="showTab('today')">Сегодня</button>
     <button class="tab" onclick="showTab('stats')">Статистика</button>
     <button class="tab" onclick="showTab('rewards')">Награды</button>
     <button class="tab" onclick="showTab('history')">История</button>
   </div>
-
-  <!-- TAB TODAY -->
 
   <div id="tab-today">
     <div class="header">
@@ -132,53 +133,37 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <button class="day-nav-btn" id="btn-day-fwd" onclick="shiftDay(1)" disabled>→</button>
       </div>
     </div>
+    <div class="sync-status" id="sync-status"></div>
 
 ```
 <div class="score-card">
   <div class="score-big" id="today-score">0</div>
   <div class="score-label">очков за этот день</div>
-  <div class="score-month">
-    <span>За месяц</span>
-    <span id="month-score">0</span>
-  </div>
+  <div class="score-month"><span>За месяц</span><span id="month-score">0</span></div>
 </div>
 
-<!-- SPORT -->
 <div class="section">
   <div class="section-title">Спорт</div>
   <div class="card">
     <div class="row">
-      <div>
-        <div class="item-label">Тренировка</div>
-        <div class="item-sub" id="sport-sub">не отмечено · +10 очков</div>
-      </div>
+      <div><div class="item-label">Тренировка</div><div class="item-sub" id="sport-sub">не отмечено · +10 очков</div></div>
       <div class="btn-group">
         <button class="btn" id="btn-yoga" onclick="setSport('yoga')">Йога</button>
         <button class="btn" id="btn-pull" onclick="setSport('pull')">Турники</button>
         <button class="btn" id="btn-basic" onclick="setSport('basic')">Запасной</button>
       </div>
     </div>
-    <div class="week-info">
-      <span>Streak этой недели</span>
-      <span id="week-sport-count">0 / 5 · бонус +30</span>
-    </div>
-    <div class="week-labels">
-      <div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div>
-      <div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div>
-    </div>
+    <div class="week-info"><span>Streak этой недели</span><span id="week-sport-count">0 / 5 · бонус +30</span></div>
+    <div class="week-labels"><div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div><div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div></div>
     <div class="week-grid" id="sport-week"></div>
   </div>
 </div>
 
-<!-- CS -->
 <div class="section">
   <div class="section-title">Counter-Strike</div>
   <div class="card">
     <div class="row">
-      <div>
-        <div class="item-label">Время в КС</div>
-        <div class="item-sub">лимит 1:30 · не играл +10</div>
-      </div>
+      <div><div class="item-label">Время в КС</div><div class="item-sub">лимит 1:30 · не играл +10</div></div>
       <div class="btn-group">
         <button class="btn" id="btn-cs-off" onclick="setCSoff()">Не играл</button>
         <button class="btn" id="btn-cs-start" onclick="toggleTimer()">Старт</button>
@@ -188,9 +173,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="timer-display" id="timer-display">0:00</div>
       <div class="timer-badge tok" id="timer-badge">готов</div>
     </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="cs-progress" style="width:0%;background:#639922;"></div>
-    </div>
+    <div class="progress-bar"><div class="progress-fill" id="cs-progress" style="width:0%;background:#639922;"></div></div>
     <div class="manual-row">
       <span>Добавить вручную:</span>
       <input type="number" id="cs-manual" min="1" max="300" placeholder="мин">
@@ -199,34 +182,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   </div>
 </div>
 
-<!-- WEED -->
 <div class="section">
   <div class="section-title">Трава (будние дни)</div>
   <div class="card">
     <div class="row">
-      <div>
-        <div class="item-label">Сегодня</div>
-        <div class="item-sub" id="weed-sub">чистый день = +20 в конце недели</div>
-      </div>
+      <div><div class="item-label">Сегодня</div><div class="item-sub" id="weed-sub">чистый день = +20 в конце недели</div></div>
       <div class="btn-group">
         <button class="btn" id="btn-weed-no" onclick="setWeed('no')">Не курил</button>
         <button class="btn" id="btn-weed-yes" onclick="setWeed('yes')">Курил</button>
         <button class="btn" id="btn-weed-na" onclick="setWeed('na')">Выходной</button>
       </div>
     </div>
-    <div class="week-info">
-      <span>Итог недели</span>
-      <span id="weed-week-pts">0 очков</span>
-    </div>
-    <div class="week-labels">
-      <div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div>
-      <div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div>
-    </div>
+    <div class="week-info"><span>Итог недели</span><span id="weed-week-pts">0 очков</span></div>
+    <div class="week-labels"><div class="week-label">Пн</div><div class="week-label">Вт</div><div class="week-label">Ср</div><div class="week-label">Чт</div><div class="week-label">Пт</div><div class="week-label">Сб</div><div class="week-label">Вс</div></div>
     <div class="week-grid" id="weed-week"></div>
   </div>
 </div>
 
-<!-- EVENING -->
 <div class="section">
   <div class="section-title">Вечерняя активность</div>
   <div class="card">
@@ -235,7 +207,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <button class="ev-btn" onclick="toggleEvening(this)">Монтаж</button>
       <button class="ev-btn" onclick="toggleEvening(this)">Вайбкодинг</button>
       <button class="ev-btn" onclick="toggleEvening(this)">Прогулка</button>
-      <button class="ev-btn" onclick="toggleEvening(this)">Прогулка с подругой</button>
       <button class="ev-btn" onclick="toggleEvening(this)">Друзья</button>
       <button class="ev-btn" onclick="toggleEvening(this)">Звонки семье</button>
       <button class="ev-btn" onclick="toggleEvening(this)">Чтение</button>
@@ -245,7 +216,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   </div>
 </div>
 
-<!-- NOTE -->
 <div class="section">
   <div class="section-title">Заметка</div>
   <div class="card">
@@ -258,20 +228,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
   </div>
 
-  <!-- TAB STATS -->
-
   <div id="tab-stats" style="display:none;">
-    <div class="header">
-      <h1>Статистика</h1>
-      <div class="date" id="stats-month-label"></div>
-    </div>
+    <div class="header"><h1>Статистика</h1><div class="date" id="stats-month-label"></div></div>
     <div class="stats-grid" id="stats-grid"></div>
     <div class="section">
       <div class="section-title">Календарь месяца</div>
       <div class="card">
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;">
-          <div class="cal-label">Пн</div><div class="cal-label">Вт</div><div class="cal-label">Ср</div>
-          <div class="cal-label">Чт</div><div class="cal-label">Пт</div><div class="cal-label">Сб</div><div class="cal-label">Вс</div>
+          <div class="cal-label">Пн</div><div class="cal-label">Вт</div><div class="cal-label">Ср</div><div class="cal-label">Чт</div><div class="cal-label">Пт</div><div class="cal-label">Сб</div><div class="cal-label">Вс</div>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
       </div>
@@ -282,44 +246,45 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
   </div>
 
-  <!-- TAB REWARDS -->
-
   <div id="tab-rewards" style="display:none;">
-    <div class="header">
-      <h1>Награды</h1>
-      <div class="date" id="rewards-month-label"></div>
-    </div>
+    <div class="header"><h1>Награды</h1><div class="date" id="rewards-month-label"></div></div>
     <div class="score-card">
       <div class="score-big" id="rewards-score">0</div>
       <div class="score-label">очков за месяц</div>
     </div>
     <div class="section">
       <div class="section-title">Цели</div>
-      <div class="card">
-        <div class="rewards-list" id="rewards-list"></div>
-      </div>
+      <div class="card"><div class="rewards-list" id="rewards-list"></div></div>
     </div>
   </div>
 
-  <!-- TAB HISTORY -->
-
   <div id="tab-history" style="display:none;">
-    <div class="header">
-      <h1>История</h1>
-      <div class="date">последние 30 дней</div>
-    </div>
+    <div class="header"><h1>История</h1><div class="date">последние 30 дней</div></div>
     <div class="section">
-      <div class="card">
-        <div id="history-list"><div class="empty-state">Нет записей</div></div>
-      </div>
+      <div class="card"><div id="history-list"><div class="empty-state">Нет записей</div></div></div>
     </div>
     <button class="export-btn" onclick="exportCSV()">Экспорт в CSV</button>
   </div>
-
 </div>
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyARFzVkmek4o8qQwEi591VKX9M0isQeUmI",
+  authDomain: "david-tracker.firebaseapp.com",
+  projectId: "david-tracker",
+  storageBucket: "david-tracker.firebasestorage.app",
+  messagingSenderId: "309665468941",
+  appId: "1:309665468941:web:0eaa5b7da3b197dd17bb44"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const fsdb = getFirestore(fbApp);
+const USER_ID = 'david';
+
 var REWARDS = [
   { pts: 100, name: 'Минимальная планка' },
   { pts: 200, name: 'Фильм без угрызений совести' },
@@ -328,7 +293,6 @@ var REWARDS = [
   { pts: 700, name: 'Что угодно' }
 ];
 var MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-var MONTHS_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 var DAYS_RU = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 var SPORT_LABELS = { yoga: 'Йога · +10', pull: 'Турники · +10', basic: 'Запасной · +10' };
 
@@ -342,19 +306,61 @@ var day = { sport: null, cs: 'none', csSeconds: 0, csRunning: false, evening: []
 var dayOffset = 0;
 var timerInt = null;
 
-function dbLoad() {
-  try { var s = localStorage.getItem('dtracker5'); if (s) db = JSON.parse(s); } catch(e) {}
-  if (!db.history) db.history = [];
-  if (!db.weekSport) db.weekSport = {};
-  if (!db.weekWeed) db.weekWeed = {};
+function setSyncStatus(status, msg) {
+  var el = document.getElementById('sync-status');
+  el.textContent = msg;
+  el.className = 'sync-status sync-' + status;
+}
+
+async function cloudLoad() {
+  setSyncStatus('pending', '↻ загрузка...');
+  try {
+    var ref = doc(fsdb, 'trackers', USER_ID);
+    var snap = await getDoc(ref);
+    if (snap.exists()) {
+      var data = snap.data();
+      db = Object.assign(db, data);
+      if (!db.history) db.history = [];
+      if (!db.weekSport) db.weekSport = {};
+      if (!db.weekWeed) db.weekWeed = {};
+    }
+    var mk = getMonthKey();
+    if (db.monthKey !== mk) { db.monthScore = 0; db.monthKey = mk; }
+    var wk = getWeekKey();
+    if (db.weekKey !== wk) { db.weekSport = {}; db.weekWeed = {}; db.weekKey = wk; db.weekBonusGiven = false; }
+    localSave();
+    setSyncStatus('ok', '✓ данные загружены');
+    setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
+  } catch(e) {
+    localLoad();
+    setSyncStatus('err', '⚠ офлайн — данные локальные');
+  }
+  updateScores();
+  updateSportWeek();
+  updateWeedWeek();
+  loadDay(0);
+}
+
+async function cloudSave() {
+  localSave();
+  setSyncStatus('pending', '↻ сохранение...');
+  try {
+    var ref = doc(fsdb, 'trackers', USER_ID);
+    await setDoc(ref, db);
+    setSyncStatus('ok', '✓ сохранено в облако');
+    setTimeout(function() { document.getElementById('sync-status').textContent = ''; }, 3000);
+  } catch(e) {
+    setSyncStatus('err', '⚠ сохранено локально (нет сети)');
+  }
+}
+
+function localSave() { try { localStorage.setItem('dtracker6', JSON.stringify(db)); } catch(e) {} }
+function localLoad() {
+  try { var s = localStorage.getItem('dtracker6'); if (s) db = Object.assign(db, JSON.parse(s)); } catch(e) {}
   var mk = getMonthKey();
   if (db.monthKey !== mk) { db.monthScore = 0; db.monthKey = mk; }
   var wk = getWeekKey();
   if (db.weekKey !== wk) { db.weekSport = {}; db.weekWeed = {}; db.weekKey = wk; db.weekBonusGiven = false; }
-}
-
-function dbSave() {
-  try { localStorage.setItem('dtracker5', JSON.stringify(db)); } catch(e) {}
 }
 
 function getOffsetDate(off) { var d = new Date(); d.setDate(d.getDate() + off); return d; }
@@ -406,9 +412,7 @@ function updateDayNav() {
 }
 
 function updateSportBtns() {
-  ['yoga','pull','basic'].forEach(function(t) {
-    document.getElementById('btn-'+t).className = 'btn' + (day.sport === t ? ' ag' : '');
-  });
+  ['yoga','pull','basic'].forEach(function(t) { document.getElementById('btn-'+t).className = 'btn' + (day.sport === t ? ' ag' : ''); });
   document.getElementById('sport-sub').textContent = day.sport ? SPORT_LABELS[day.sport] : 'не отмечено · +10 очков';
 }
 
@@ -424,12 +428,10 @@ function updateTimer() {
   var limit = 90 * 60; var pct = Math.min(100, Math.round(day.csSeconds / limit * 100));
   var bar = document.getElementById('cs-progress'); var badge = document.getElementById('timer-badge');
   if (day.csSeconds === 0) {
-    bar.style.width = '0%'; bar.style.background = '#639922';
-    badge.textContent = 'готов'; badge.className = 'timer-badge tok';
+    bar.style.width = '0%'; bar.style.background = '#639922'; badge.textContent = 'готов'; badge.className = 'timer-badge tok';
   } else if (day.csSeconds <= limit) {
     bar.style.width = pct + '%'; bar.style.background = pct > 80 ? '#EF9F27' : '#639922';
-    badge.textContent = 'в лимите'; badge.className = 'timer-badge ' + (pct > 80 ? 'twarn' : 'tok');
-    day.cs = 'ok';
+    badge.textContent = 'в лимите'; badge.className = 'timer-badge ' + (pct > 80 ? 'twarn' : 'tok'); day.cs = 'ok';
   } else {
     bar.style.width = '100%'; bar.style.background = '#E24B4A';
     var over = day.csSeconds - limit; var om = Math.floor(over/60); var os = over%60;
@@ -441,16 +443,14 @@ function updateTimer() {
 
 function updateEveningBtns() {
   document.querySelectorAll('.ev-btn').forEach(function(b) {
-    var active = day.evening.indexOf(b.textContent.trim()) !== -1;
-    b.className = active ? 'ev-btn sel' : 'ev-btn';
+    b.className = day.evening.indexOf(b.textContent.trim()) !== -1 ? 'ev-btn sel' : 'ev-btn';
   });
 }
 
 function updateWeedBtns() {
   ['no','yes','na'].forEach(function(v) {
     var b = document.getElementById('btn-weed-'+v);
-    var cls = v==='no' ? ' ag' : v==='yes' ? ' ar' : ' aa';
-    b.className = 'btn' + (day.weed === v ? cls : '');
+    b.className = 'btn' + (day.weed === v ? (v==='no'?' ag':v==='yes'?' ar':' aa') : '');
   });
   var subs = { no:'+20 в конце недели', yes:'штраф в конце недели', na:'выходной, не считается' };
   document.getElementById('weed-sub').textContent = subs[day.weed] || 'чистый день = +20 в конце недели';
@@ -472,8 +472,7 @@ function calcWeedPts() {
   var pts = 0, misses = 0;
   for (var i = 0; i < 5; i++) {
     var v = db.weekWeed['d'+i];
-    if (v === 'no') pts += 20;
-    else if (v === 'yes') { misses++; pts -= 10 + Math.max(0,(misses-1)*5); }
+    if (v === 'no') pts += 20; else if (v === 'yes') { misses++; pts -= 10 + Math.max(0,(misses-1)*5); }
   }
   return pts;
 }
@@ -506,51 +505,44 @@ function loadDay(off) {
   updateSportBtns(); updateCSBtns(); updateTimer(); updateEveningBtns(); updateWeedBtns(); updateScores();
 }
 
-function shiftDay(dir) {
+window.shiftDay = function(dir) {
   var next = dayOffset + dir; if (next > 0) return;
   dayOffset = next; loadDay(dayOffset); updateDayNav();
-}
-
-function setSport(type) { day.sport = day.sport === type ? null : type; updateSportBtns(); updateScores(); }
-
-function setCSoff() {
+};
+window.setSport = function(type) { day.sport = day.sport === type ? null : type; updateSportBtns(); updateScores(); };
+window.setCSoff = function() {
   clearInterval(timerInt); timerInt = null;
   day.cs = 'off'; day.csSeconds = 0; day.csRunning = false;
   updateCSBtns(); updateTimer(); updateScores();
-}
-
-function toggleTimer() {
+};
+window.toggleTimer = function() {
   document.getElementById('btn-cs-off').className = 'btn';
   if (day.cs === 'off') day.cs = 'none';
   if (day.csRunning) { clearInterval(timerInt); timerInt = null; day.csRunning = false; }
   else { day.csRunning = true; timerInt = setInterval(function() { day.csSeconds++; updateTimer(); }, 1000); }
   updateCSBtns();
-}
-
-function addManualCS() {
+};
+window.addManualCS = function() {
   var inp = document.getElementById('cs-manual'); var mins = parseInt(inp.value);
   if (!mins || mins < 1) return;
   if (day.cs === 'off') day.cs = 'none';
   document.getElementById('btn-cs-off').className = 'btn';
   day.csSeconds += mins * 60; inp.value = '';
   updateTimer(); updateCSBtns();
-}
-
-function toggleEvening(el) {
+};
+window.toggleEvening = function(el) {
   var activity = el.textContent.trim();
   var idx = day.evening.indexOf(activity);
   if (idx === -1) day.evening.push(activity); else day.evening.splice(idx, 1);
   updateEveningBtns();
-}
-
-function setWeed(val) {
+};
+window.setWeed = function(val) {
   day.weed = day.weed === val ? null : val;
   var d = getDOW(dayOffset);
   if (day.weed) db.weekWeed['d'+d] = day.weed; else delete db.weekWeed['d'+d];
   updateWeedBtns(); updateWeedWeek();
-}
-
-function saveDay() {
+};
+window.saveDay = async function() {
   day.note = document.getElementById('day-note').value.trim();
   var pts = calcScore();
   var today = getDateStr(dayOffset);
@@ -566,10 +558,10 @@ function saveDay() {
   if (idx >= 0) { db.monthScore = Math.max(0, db.monthScore + pts - db.history[idx].pts); db.history[idx] = entry; }
   else { db.monthScore += pts; db.history.push(entry); }
   if (bonus > 0) db.monthScore += bonus;
-  dbSave(); updateScores(); updateSportWeek(); updateWeedWeek();
-  var msg = bonus > 0 ? 'Сохранено · +' + pts + ' оч. + бонус +30!' : 'Сохранено · ' + (pts >= 0 ? '+' : '') + pts + ' очков';
-  showToast(msg);
-}
+  updateScores(); updateSportWeek(); updateWeedWeek();
+  await cloudSave();
+  showToast(bonus > 0 ? 'Сохранено · +' + pts + ' оч. + бонус +30!' : 'Сохранено · ' + (pts >= 0 ? '+' : '') + pts + ' очков');
+};
 
 function renderRewards() {
   var list = document.getElementById('rewards-list'); if (!list) return;
@@ -593,46 +585,30 @@ function renderHistory() {
 }
 
 function renderStats() {
-  var d = new Date();
-  var mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-  var monthEntries = db.history.filter(function(h) { return h.date.startsWith(mk); });
-  var totalDays = monthEntries.length;
-  var sportDays = monthEntries.filter(function(h) { return h.sport; }).length;
-  var csOkDays = monthEntries.filter(function(h) { return h.cs === 'ok' || h.cs === 'off'; }).length;
-  var cleanDays = monthEntries.filter(function(h) { return h.weed === 'no'; }).length;
-  var avgScore = totalDays > 0 ? Math.round(monthEntries.reduce(function(a,h) { return a+h.pts; }, 0) / totalDays) : 0;
-  var sg = document.getElementById('stats-grid');
-  if (!sg) return;
+  var d = new Date(); var mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  var me = db.history.filter(function(h) { return h.date.startsWith(mk); });
+  var sg = document.getElementById('stats-grid'); if (!sg) return;
   sg.innerHTML = [
-    { val: totalDays, label: 'Дней записано' },
-    { val: sportDays, label: 'Дней спорта' },
-    { val: csOkDays, label: 'КС в лимите' },
-    { val: cleanDays + ' / ' + totalDays, label: 'Без травы (будн.)' }
-  ].map(function(s) {
-    return '<div class="stat-card"><div class="stat-val">'+s.val+'</div><div class="stat-label">'+s.label+'</div></div>';
-  }).join('');
-
-  renderCalendar();
-  renderWeekSummary();
+    { val: me.length, label: 'Дней записано' },
+    { val: me.filter(function(h){return h.sport;}).length, label: 'Дней спорта' },
+    { val: me.filter(function(h){return h.cs==='ok'||h.cs==='off';}).length, label: 'КС в лимите' },
+    { val: me.filter(function(h){return h.weed==='no';}).length + ' / ' + me.length, label: 'Без травы (будн.)' }
+  ].map(function(s) { return '<div class="stat-card"><div class="stat-val">'+s.val+'</div><div class="stat-label">'+s.label+'</div></div>'; }).join('');
+  renderCalendar(); renderWeekSummary();
 }
 
 function renderCalendar() {
   var grid = document.getElementById('cal-grid'); if (!grid) return;
-  var d = new Date(); var year = d.getFullYear(); var month = d.getMonth();
-  var today = d.getDate();
-  var firstDay = new Date(year, month, 1).getDay();
-  firstDay = firstDay === 0 ? 6 : firstDay - 1;
+  var d = new Date(); var year = d.getFullYear(); var month = d.getMonth(); var today = d.getDate();
+  var firstDay = new Date(year, month, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1;
   var daysInMonth = new Date(year, month+1, 0).getDate();
   var mk = year + '-' + String(month+1).padStart(2,'0');
   var entryMap = {};
-  db.history.filter(function(h) { return h.date.startsWith(mk); }).forEach(function(h) {
-    var day = parseInt(h.date.split('-')[2]); entryMap[day] = h.pts;
-  });
+  db.history.filter(function(h){return h.date.startsWith(mk);}).forEach(function(h){ entryMap[parseInt(h.date.split('-')[2])] = h.pts; });
   var html = '';
   for (var i = 0; i < firstDay; i++) html += '<div class="cal-day filler"></div>';
   for (var i = 1; i <= daysInMonth; i++) {
-    var pts = entryMap[i];
-    var cls = 'cal-day';
+    var pts = entryMap[i]; var cls = 'cal-day';
     if (pts !== undefined) cls += pts >= 0 ? ' has-data' : ' has-data neg';
     else cls += ' empty-day';
     if (i === today) cls += ' today-dot';
@@ -645,59 +621,48 @@ function renderWeekSummary() {
   var ws = document.getElementById('week-summary'); if (!ws) return;
   var sportCount = Object.values(db.weekSport).filter(Boolean).length;
   var weedPts = calcWeedPts();
-  var bonus = db.weekBonusGiven ? 30 : (sportCount >= 5 ? 30 : 0);
-  var wk = getWeekKey();
-  var weekEntries = db.history.filter(function(h) { return h.date >= wk; });
   var sportPts = sportCount * 10 + (db.weekBonusGiven ? 30 : 0);
-  var csPts = weekEntries.reduce(function(a,h) {
-    if (h.cs==='off') return a+10; if (h.cs==='ok') return a+5; if (h.cs==='over') return a-10; return a;
+  var wk = getWeekKey();
+  var csPts = db.history.filter(function(h){return h.date>=wk;}).reduce(function(a,h){
+    if(h.cs==='off') return a+10; if(h.cs==='ok') return a+5; if(h.cs==='over') return a-10; return a;
   }, 0);
   var total = sportPts + csPts + weedPts;
-  ws.innerHTML = '<div class="week-summary-title">Неделя с ' + fmtDate(wk) + '</div>' + [
-    ['Спорт', sportCount + '/5 дней · ' + sportPts + ' оч.'],
-    ['КС', csPts + ' оч.'],
-    ['Трава', weedPts + ' оч.'],
-    ['Итого', total + ' оч.'],
-  ].map(function(r) {
-    return '<div class="week-summary-row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';
-  }).join('');
+  ws.innerHTML = '<div class="week-summary-title">Неделя с ' + fmtDate(wk) + '</div>' +
+    [['Спорт', sportCount+'/5 · '+sportPts+' оч.'],['КС', csPts+' оч.'],['Трава', weedPts+' оч.'],['Итого', total+' оч.']].map(function(r){
+      return '<div class="week-summary-row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';
+    }).join('');
 }
 
-function exportCSV() {
-  if (!db.history.length) { showToast('Нет данных для экспорта'); return; }
+window.exportCSV = function() {
+  if (!db.history.length) { showToast('Нет данных'); return; }
   var SL = { yoga:'Йога', pull:'Турники', basic:'Запасной' };
   var CL = { off:'не играл', ok:'в лимите', over:'перебор', none:'—' };
   var rows = ['Дата,Спорт,КС,Активность,Трава,Очки,Заметка'];
   db.history.forEach(function(h) {
     var ev = Array.isArray(h.evening) ? h.evening.join('|') : (h.evening||'');
-    rows.push([h.date, SL[h.sport]||'—', CL[h.cs]||'—', ev, h.weed||'—', h.pts, (h.note||'').replace(/,/g,' ')].join(','));
+    rows.push([h.date,SL[h.sport]||'—',CL[h.cs]||'—',ev,h.weed||'—',h.pts,(h.note||'').replace(/,/g,' ')].join(','));
   });
-  var blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a'); a.href = url;
-  a.download = 'tracker_' + getMonthKey() + '.csv';
-  a.click(); URL.revokeObjectURL(url);
+  var blob = new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob); var a = document.createElement('a');
+  a.href = url; a.download = 'tracker_'+getMonthKey()+'.csv'; a.click(); URL.revokeObjectURL(url);
   showToast('CSV скачан');
-}
+};
 
-function showTab(tab) {
-  ['today','stats','rewards','history'].forEach(function(t) {
+window.showTab = function(tab) {
+  ['today','stats','rewards','history'].forEach(function(t){
     document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
   });
-  document.querySelectorAll('.tab').forEach(function(el, i) {
+  document.querySelectorAll('.tab').forEach(function(el,i){
     el.className = ['today','stats','rewards','history'][i]===tab ? 'tab active' : 'tab';
   });
   if (tab==='rewards') renderRewards();
   if (tab==='history') renderHistory();
   if (tab==='stats') renderStats();
-}
+};
 
-dbLoad();
 updateHeader();
 updateDayNav();
-loadDay(0);
-updateSportWeek();
-updateWeedWeek();
+cloudLoad();
 </script>
 
 </body>
