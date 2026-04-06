@@ -143,7 +143,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .ep-field-row label { font-size: 13px; color: #555; flex: 1; }
 .ep-field-row input[type=number] { width: 72px; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 6px 8px; font-size: 13px; font-family: inherit; text-align: center; }
 .ep-field-row input[type=text] { flex: 1; border: 1.5px solid #e0e0e0; border-radius: 8px; padding: 6px 10px; font-size: 13px; font-family: inherit; }
-.ep-save-btn { width: 100%; padding: 14px; font-size: 15px; font-weight: 600; border-radius: 12px; border: none; background: #1a1a1a; color: #fff; cursor: pointer; font-family: inherit; margin-top: 6px; }
+.ep-danger-btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 12px; border: 1.5px solid #F09595; background: #FCEBEB; color: #A32D2D; cursor: pointer; font-family: inherit; margin-top: 8px; }
+.add-block-btn { width: 100%; padding: 14px; font-size: 14px; font-weight: 500; border-radius: 14px; border: 2px dashed #d0d0d0; background: transparent; color: #999; cursor: pointer; font-family: inherit; margin-bottom: 16px; -webkit-tap-highlight-color: transparent; }
+.add-block-btn:active { background: #f5f5f5; }
+.ep-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+.ep-type-btn { padding: 12px 8px; border-radius: 12px; border: 1.5px solid #e0e0e0; background: #fff; color: #555; font-size: 13px; cursor: pointer; text-align: center; font-family: inherit; font-weight: 500; }
+.ep-type-btn.sel { background: #EAF3DE; border-color: #97C459; color: #3B6D11; }
+.ep-type-desc { font-size: 11px; color: #aaa; margin-top: 4px; text-align: center; }
 </style>
 
 </head>
@@ -365,6 +371,16 @@ function getWeekKey() {
   return new Date(d.setDate(diff)).toISOString().split('T')[0];
 }
 function getDOW(off) { var d = getOffsetDate(off); var wd = d.getDay(); return wd === 0 ? 6 : wd - 1; }
+// Конвертирует строку даты '2025-04-06' в день недели 0=Пн..6=Вс
+// Возвращает null если дата не попадает в текущую неделю (воскресенье прошлой недели)
+function dateToDOW(dateStr) {
+  var wk = getWeekKey();
+  var wkEnd = new Date(wk); wkEnd.setDate(wkEnd.getDate() + 6);
+  var wkEndStr = wkEnd.toISOString().split('T')[0];
+  if (dateStr < wk || dateStr > wkEndStr) return null;
+  var d = new Date(dateStr + 'T12:00:00');
+  var wd = d.getDay(); return wd === 0 ? 6 : wd - 1;
+}
 function fmtDate(str) { var p = str.split('-'); return parseInt(p[2]) + ' ' + MONTHS[parseInt(p[1])-1]; }
 
 function setSyncStatus(status, msg) {
@@ -453,6 +469,13 @@ function calcScore() {
       else if (day.cs === 'ok') pts += (b.ptsOk || 5);
       else if (day.cs === 'over') pts += (b.ptsOver || -10);
     }
+    if (b.type === 'simple' && day.customBlocks && day.customBlocks[b.id]) {
+      var v = (b.variants||[]).find(function(x){return x.key===day.customBlocks[b.id];});
+      if (v) pts += v.pts;
+    }
+    if (b.type === 'counter' && day.customBlocks && day.customBlocks[b.id]) {
+      pts += (day.customBlocks[b.id] || 0) * (b.ptsPerUnit || 1);
+    }
   });
   return pts;
 }
@@ -522,6 +545,12 @@ function renderBlocks() {
       inner = renderWeedBlock(b);
     } else if (b.type === 'multi') {
       inner = renderMultiBlock(b);
+    } else if (b.type === 'simple') {
+      inner = renderSimpleBlock(b);
+    } else if (b.type === 'counter') {
+      inner = renderCounterBlock(b);
+    } else if (b.type === 'note') {
+      inner = renderNoteBlock(b);
     }
 
     html += '<div class="section" id="section-' + b.id + '">' +
@@ -530,6 +559,14 @@ function renderBlocks() {
       '</div>';
   });
   container.innerHTML = html;
+  // Кнопка добавления блока в режиме редактирования
+  if (editMode) {
+    var addBtn = document.createElement('button');
+    addBtn.className = 'add-block-btn';
+    addBtn.textContent = '+ Добавить новый блок';
+    addBtn.onclick = openAddBlockPanel;
+    container.appendChild(addBtn);
+  }
   // re-attach state
   updateSportBtns(); updateCSBtns(); updateTimer(); updateEveningBtns(); updateWeedBtns();
 }
@@ -541,7 +578,7 @@ function renderSportBlock(b) {
     return '<button class="btn" id="btn-sport-' + v.key + '" onclick="setSport(\'' + v.key + '\')">' + escHtml(v.label) + '</button>';
   }).join('');
   return '<div class="row"><div><div class="item-label">' + escHtml(b.subtitle||'Тренировка') + '</div>' +
-    '<div class="item-sub" id="sport-sub">не отмечено · +10 очков</div></div>' +
+    '<div class="item-sub" id="sport-sub"></div></div>' +
     '<div class="btn-group">' + btns + '</div></div>' +
     '<div class="week-info"><span>Streak этой недели</span><span id="week-sport-count">0 / ' + (b.weekBonus?b.weekBonus.target:5) + ' · бонус +' + (b.weekBonus?b.weekBonus.pts:30) + '</span></div>' +
     '<div class="week-labels">' + ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(function(d){return '<div class="week-label">'+d+'</div>';}).join('') + '</div>' +
@@ -550,7 +587,7 @@ function renderSportBlock(b) {
 
 function renderCSBlock(b) {
   return '<div class="row"><div><div class="item-label">Время в КС</div>' +
-    '<div class="item-sub">лимит ' + Math.floor((b.limitMinutes||90)/60) + ':' + String((b.limitMinutes||90)%60).padStart(2,'0') + ' · не играл +' + (b.ptsOff||10) + '</div></div>' +
+    '<div class="item-sub">лимит ' + Math.floor((b.limitMinutes||90)/60) + ':' + String((b.limitMinutes||90)%60).padStart(2,'0') + '</div></div>' +
     '<div class="btn-group">' +
     '<button class="btn" id="btn-cs-off" onclick="setCSoff()">Не играл</button>' +
     '<button class="btn" id="btn-cs-start" onclick="toggleTimer()">Старт</button>' +
@@ -564,7 +601,7 @@ function renderCSBlock(b) {
 
 function renderWeedBlock(b) {
   return '<div class="row"><div><div class="item-label">' + escHtml(b.subtitle||'Сегодня') + '</div>' +
-    '<div class="item-sub" id="weed-sub">чистый день = +' + (b.ptsClean||20) + ' в конце недели</div></div>' +
+    '<div class="item-sub" id="weed-sub"></div></div>' +
     '<div class="btn-group">' +
     '<button class="btn" id="btn-weed-no" onclick="setWeed(\'no\')">Не курил</button>' +
     '<button class="btn" id="btn-weed-yes" onclick="setWeed(\'yes\')">Курил</button>' +
@@ -583,510 +620,710 @@ function renderMultiBlock(b) {
     '<div class="evening-grid">' + btns + '</div>';
 }
 
+function renderSimpleBlock(b) {
+  var saved = day.customBlocks && day.customBlocks[b.id];
+  var btns = (b.variants||[]).map(function(v) {
+    var active = saved === v.key;
+    return '<button class="btn' + (active?' ag':'') + '" onclick="setSimpleBlock(\'' + b.id + '\',\'' + v.key + '\')">' + escHtml(v.label) + '</button>';
+  }).join('');
+  var selV = saved ? (b.variants||[]).find(function(v){return v.key===saved;}) : null;
+  var sub = selV ? escHtml(selV.label) : '';
+  return '<div class="row"><div><div class="item-label">' + escHtml(b.subtitle||b.title) + '</div>' +
+    '<div class="item-sub" id="sub-' + b.id + '">' + sub + '</div></div>' +
+    '<div class="btn-group">' + btns + '</div></div>';
+}
+
+function renderCounterBlock(b) {
+  var saved = (day.customBlocks && day.customBlocks[b.id]) ? day.customBlocks[b.id] : 0;
+  var pts = saved * (b.ptsPerUnit||1);
+  return '<div class="row"><div><div class="item-label">' + escHtml(b.subtitle||b.title) + '</div>' +
+    '<div class="item-sub" id="sub-' + b.id + '">' + saved + ' ' + escHtml(b.unit||'') + ' · ' + (pts>=0?'+':'') + pts + ' оч.</div></div></div>' +
+    '<div class="manual-row" style="margin-top:12px;">' +
+    '<input type="number" id="cnt-' + b.id + '" min="0" max="' + (b.maxValue||999) + '" value="' + saved + '" style="width:80px;padding:6px 8px;border-radius:10px;border:1.5px solid #e0e0e0;font-size:15px;text-align:center;">' +
+    '<span style="font-size:12px;color:#999;">' + escHtml(b.unit||'') + '</span>' +
+    '<button class="btn" onclick="setCounterBlock(\'' + b.id + '\')" style="padding:6px 12px;">✓</button></div>';
+}
+
+function renderNoteBlock(b) {
+  var saved = (day.customBlocks && day.customBlocks[b.id]) ? day.customBlocks[b.id] : '';
+  return '<textarea class="note-input" id="note-' + b.id + '" rows="2" placeholder="' + escHtml(b.subtitle||b.title) + '..." onchange="setNoteBlock(\'' + b.id + '\',this.value)">' + escHtml(saved) + '</textarea>';
+
+}
+
+window.setSimpleBlock = function(blockId, varKey) {
+if (!day.customBlocks) day.customBlocks = {};
+day.customBlocks[blockId] = day.customBlocks[blockId] === varKey ? null : varKey;
+renderBlocks(); updateScores();
+};
+window.setCounterBlock = function(blockId) {
+var inp = document.getElementById(‘cnt-’ + blockId); if (!inp) return;
+if (!day.customBlocks) day.customBlocks = {};
+day.customBlocks[blockId] = parseInt(inp.value)||0;
+renderBlocks(); updateScores();
+};
+window.setNoteBlock = function(blockId, val) {
+if (!day.customBlocks) day.customBlocks = {};
+day.customBlocks[blockId] = val;
+};
+
 // ── Sport ──
 function updateSportBtns() {
-  var blocks = getBlocks();
-  var sb = blocks.find(function(b){return b.type==='sport';});
-  if (!sb) return;
-  sb.variants.forEach(function(v) {
-    var el = document.getElementById('btn-sport-' + v.key); if (!el) return;
-    el.className = 'btn' + (day.sport === v.key ? ' ag' : '');
-  });
-  var sub = document.getElementById('sport-sub'); if (!sub) return;
-  if (day.sport) {
-    var v = sb.variants.find(function(x){return x.key===day.sport;});
-    sub.textContent = (v ? v.label : day.sport) + ' · +' + (v ? v.pts : 10) + ' очков';
-  } else {
-    sub.textContent = 'не отмечено · +10 очков';
-  }
+var blocks = getBlocks();
+var sb = blocks.find(function(b){return b.type===‘sport’;});
+if (!sb) return;
+sb.variants.forEach(function(v) {
+var el = document.getElementById(‘btn-sport-’ + v.key); if (!el) return;
+el.className = ‘btn’ + (day.sport === v.key ? ’ ag’ : ‘’);
+});
+var sub = document.getElementById(‘sport-sub’); if (!sub) return;
+if (day.sport) {
+var v = sb.variants.find(function(x){return x.key===day.sport;});
+sub.textContent = v ? v.label : day.sport;
+} else {
+sub.textContent = ‘’;
+}
 }
 
 window.setSport = function(type) {
-  day.sport = day.sport === type ? null : type;
-  updateSportBtns(); updateScores();
+day.sport = day.sport === type ? null : type;
+updateSportBtns(); updateScores();
 };
 
 function updateSportWeek() {
-  var grid = document.getElementById('sport-week'); if (!grid) return;
-  var blocks = getBlocks();
-  var sb = blocks.find(function(b){return b.type==='sport';});
-  var target = sb && sb.weekBonus ? sb.weekBonus.target : 5;
-  var bonus = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
-  grid.innerHTML = ''; var count = 0;
-  for (var i = 0; i < 7; i++) {
-    var d = document.createElement('div');
-    if (db.weekSport['d'+i]) { d.className = 'wd done'; d.textContent = '+'; count++; }
-    else { d.className = 'wd empty'; d.textContent = '·'; }
-    grid.appendChild(d);
-  }
-  var wsc = document.getElementById('week-sport-count');
-  if (wsc) wsc.textContent = count + ' / ' + target + ' · бонус +' + bonus;
+var grid = document.getElementById(‘sport-week’); if (!grid) return;
+var blocks = getBlocks();
+var sb = blocks.find(function(b){return b.type===‘sport’;});
+var target = sb && sb.weekBonus ? sb.weekBonus.target : 5;
+var bonus = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
+grid.innerHTML = ‘’; var count = 0;
+for (var i = 0; i < 7; i++) {
+var d = document.createElement(‘div’);
+if (db.weekSport[‘d’+i]) { d.className = ‘wd done’; d.textContent = ‘+’; count++; }
+else { d.className = ‘wd empty’; d.textContent = ‘·’; }
+grid.appendChild(d);
+}
+var wsc = document.getElementById(‘week-sport-count’);
+if (wsc) wsc.textContent = count + ’ / ’ + target + ’ · бонус +’ + bonus;
 }
 
 // ── CS ──
 function updateCSBtns() {
-  var el = document.getElementById('btn-cs-off'); if (!el) return;
-  el.className = 'btn' + (day.cs === 'off' ? ' ag' : '');
-  var sb = document.getElementById('btn-cs-start'); if (!sb) return;
-  sb.textContent = day.csRunning ? 'Пауза' : (day.csSeconds > 0 ? 'Продолжить' : 'Старт');
+var el = document.getElementById(‘btn-cs-off’); if (!el) return;
+el.className = ‘btn’ + (day.cs === ‘off’ ? ’ ag’ : ‘’);
+var sb = document.getElementById(‘btn-cs-start’); if (!sb) return;
+sb.textContent = day.csRunning ? ‘Пауза’ : (day.csSeconds > 0 ? ‘Продолжить’ : ‘Старт’);
 }
 
 function updateTimer() {
-  var td = document.getElementById('timer-display'); if (!td) return;
-  var m = Math.floor(day.csSeconds / 60); var s = day.csSeconds % 60;
-  td.textContent = m + ':' + String(s).padStart(2,'0');
-  var blocks = getBlocks();
-  var cb = blocks.find(function(b){return b.type==='cs';});
-  var limit = (cb ? (cb.limitMinutes||90) : 90) * 60;
-  var pct = Math.min(100, Math.round(day.csSeconds / limit * 100));
-  var bar = document.getElementById('cs-progress'); var badge = document.getElementById('timer-badge');
-  if (!bar || !badge) return;
-  if (day.csSeconds === 0) {
-    bar.style.width = '0%'; bar.style.background = '#639922'; badge.textContent = 'готов'; badge.className = 'timer-badge tok';
-  } else if (day.csSeconds <= limit) {
-    bar.style.width = pct + '%'; bar.style.background = pct > 80 ? '#EF9F27' : '#639922';
-    badge.textContent = 'в лимите'; badge.className = 'timer-badge ' + (pct > 80 ? 'twarn' : 'tok'); day.cs = 'ok';
-  } else {
-    bar.style.width = '100%'; bar.style.background = '#E24B4A';
-    var over = day.csSeconds - limit; var om = Math.floor(over/60); var os = over%60;
-    badge.textContent = '+' + om + ':' + String(os).padStart(2,'0') + ' сверх';
-    badge.className = 'timer-badge tover'; day.cs = 'over';
-  }
-  updateScores();
+var td = document.getElementById(‘timer-display’); if (!td) return;
+var m = Math.floor(day.csSeconds / 60); var s = day.csSeconds % 60;
+td.textContent = m + ‘:’ + String(s).padStart(2,‘0’);
+var blocks = getBlocks();
+var cb = blocks.find(function(b){return b.type===‘cs’;});
+var limit = (cb ? (cb.limitMinutes||90) : 90) * 60;
+var pct = Math.min(100, Math.round(day.csSeconds / limit * 100));
+var bar = document.getElementById(‘cs-progress’); var badge = document.getElementById(‘timer-badge’);
+if (!bar || !badge) return;
+if (day.csSeconds === 0) {
+bar.style.width = ‘0%’; bar.style.background = ‘#639922’; badge.textContent = ‘готов’; badge.className = ‘timer-badge tok’;
+} else if (day.csSeconds <= limit) {
+bar.style.width = pct + ‘%’; bar.style.background = pct > 80 ? ‘#EF9F27’ : ‘#639922’;
+badge.textContent = ‘в лимите’; badge.className = ‘timer-badge ’ + (pct > 80 ? ‘twarn’ : ‘tok’); day.cs = ‘ok’;
+} else {
+bar.style.width = ‘100%’; bar.style.background = ‘#E24B4A’;
+var over = day.csSeconds - limit; var om = Math.floor(over/60); var os = over%60;
+badge.textContent = ‘+’ + om + ‘:’ + String(os).padStart(2,‘0’) + ’ сверх’;
+badge.className = ‘timer-badge tover’; day.cs = ‘over’;
+}
+updateScores();
 }
 
 window.setCSoff = function() {
-  clearInterval(timerInt); timerInt = null;
-  day.cs = 'off'; day.csSeconds = 0; day.csRunning = false;
-  updateCSBtns(); updateTimer(); updateScores();
+clearInterval(timerInt); timerInt = null;
+day.cs = ‘off’; day.csSeconds = 0; day.csRunning = false;
+updateCSBtns(); updateTimer(); updateScores();
 };
 window.toggleTimer = function() {
-  var el = document.getElementById('btn-cs-off'); if (el) el.className = 'btn';
-  if (day.cs === 'off') day.cs = 'none';
-  if (day.csRunning) { clearInterval(timerInt); timerInt = null; day.csRunning = false; }
-  else { day.csRunning = true; timerInt = setInterval(function() { day.csSeconds++; updateTimer(); }, 1000); }
-  updateCSBtns();
+var el = document.getElementById(‘btn-cs-off’); if (el) el.className = ‘btn’;
+if (day.cs === ‘off’) day.cs = ‘none’;
+if (day.csRunning) { clearInterval(timerInt); timerInt = null; day.csRunning = false; }
+else { day.csRunning = true; timerInt = setInterval(function() { day.csSeconds++; updateTimer(); }, 1000); }
+updateCSBtns();
 };
 window.addManualCS = function() {
-  var inp = document.getElementById('cs-manual'); if (!inp) return;
-  var mins = parseInt(inp.value);
-  if (!mins || mins < 1) return;
-  if (day.cs === 'off') day.cs = 'none';
-  var el = document.getElementById('btn-cs-off'); if (el) el.className = 'btn';
-  day.csSeconds += mins * 60; inp.value = '';
-  updateTimer(); updateCSBtns();
+var inp = document.getElementById(‘cs-manual’); if (!inp) return;
+var mins = parseInt(inp.value);
+if (!mins || mins < 1) return;
+if (day.cs === ‘off’) day.cs = ‘none’;
+var el = document.getElementById(‘btn-cs-off’); if (el) el.className = ‘btn’;
+day.csSeconds += mins * 60; inp.value = ‘’;
+updateTimer(); updateCSBtns();
 };
 
 // ── Weed ──
 function updateWeedBtns() {
-  var blocks = getBlocks();
-  var wb = blocks.find(function(b){return b.type==='weed';});
-  var ptsClean = wb ? (wb.ptsClean||20) : 20;
-  ['no','yes','na'].forEach(function(v) {
-    var b = document.getElementById('btn-weed-'+v); if (!b) return;
-    b.className = 'btn' + (day.weed === v ? (v==='no'?' ag':v==='yes'?' ar':' aa') : '');
-  });
-  var sub = document.getElementById('weed-sub'); if (!sub) return;
-  var subs = { no:'+'+ptsClean+' в конце недели', yes:'штраф в конце недели', na:'выходной, не считается' };
-  sub.textContent = subs[day.weed] || ('чистый день = +'+ptsClean+' в конце недели');
+var blocks = getBlocks();
+var wb = blocks.find(function(b){return b.type===‘weed’;});
+var ptsClean = wb ? (wb.ptsClean||20) : 20;
+[‘no’,‘yes’,‘na’].forEach(function(v) {
+var b = document.getElementById(‘btn-weed-’+v); if (!b) return;
+b.className = ‘btn’ + (day.weed === v ? (v===‘no’?’ ag’:v===‘yes’?’ ar’:’ aa’) : ‘’);
+});
+var sub = document.getElementById(‘weed-sub’); if (!sub) return;
+var subs = { no:‘чистый день ✓’, yes:‘отмечено’, na:‘выходной’ };
+sub.textContent = subs[day.weed] || ‘’;
 }
 window.setWeed = function(val) {
-  day.weed = day.weed === val ? null : val;
-  var d = getDOW(dayOffset);
-  if (day.weed) db.weekWeed['d'+d] = day.weed; else delete db.weekWeed['d'+d];
-  updateWeedBtns(); updateWeedWeek();
+day.weed = day.weed === val ? null : val;
+var d = getDOW(dayOffset);
+if (day.weed) db.weekWeed[‘d’+d] = day.weed; else delete db.weekWeed[‘d’+d];
+updateWeedBtns(); updateWeedWeek();
 };
 function calcWeedPts() {
-  var blocks = getBlocks();
-  var wb = blocks.find(function(b){return b.type==='weed';});
-  var ptsClean = wb ? (wb.ptsClean||20) : 20;
-  var ptsDirty = wb ? (wb.ptsDirty||-10) : -10;
-  var pts = 0, misses = 0;
-  for (var i = 0; i < 5; i++) {
-    var v = db.weekWeed['d'+i];
-    if (v === 'no') pts += ptsClean;
-    else if (v === 'yes') { misses++; pts += ptsDirty - Math.max(0,(misses-1)*5); }
-  }
-  return pts;
+var blocks = getBlocks();
+var wb = blocks.find(function(b){return b.type===‘weed’;});
+var ptsClean = wb ? (wb.ptsClean||20) : 20;
+var ptsDirty = wb ? (wb.ptsDirty||-10) : -10;
+var pts = 0, misses = 0;
+for (var i = 0; i < 5; i++) {
+var v = db.weekWeed[‘d’+i];
+if (v === ‘no’) pts += ptsClean;
+else if (v === ‘yes’) { misses++; pts += ptsDirty - Math.max(0,(misses-1)*5); }
+}
+return pts;
 }
 function updateWeedWeek() {
-  var grid = document.getElementById('weed-week'); if (!grid) return;
-  grid.innerHTML = '';
-  for (var i = 0; i < 7; i++) {
-    var d = document.createElement('div'); var v = db.weekWeed['d'+i];
-    if (v === 'no') { d.className = 'wd done'; d.textContent = '+'; }
-    else if (v === 'yes') { d.className = 'wd miss'; d.textContent = '×'; }
-    else { d.className = 'wd empty'; d.textContent = '·'; }
-    grid.appendChild(d);
-  }
-  var wp = document.getElementById('weed-week-pts');
-  if (wp) wp.textContent = calcWeedPts() + ' очков';
+var grid = document.getElementById(‘weed-week’); if (!grid) return;
+grid.innerHTML = ‘’;
+for (var i = 0; i < 7; i++) {
+var d = document.createElement(‘div’); var v = db.weekWeed[‘d’+i];
+if (v === ‘no’) { d.className = ‘wd done’; d.textContent = ‘+’; }
+else if (v === ‘yes’) { d.className = ‘wd miss’; d.textContent = ‘×’; }
+else { d.className = ‘wd empty’; d.textContent = ‘·’; }
+grid.appendChild(d);
+}
+var wp = document.getElementById(‘weed-week-pts’);
+if (wp) wp.textContent = calcWeedPts() + ’ очков’;
 }
 
 // ── Evening ──
 function updateEveningBtns() {
-  document.querySelectorAll('.ev-btn').forEach(function(b) {
-    b.className = day.evening.indexOf(b.textContent.trim()) !== -1 ? 'ev-btn sel' : 'ev-btn';
-  });
+document.querySelectorAll(’.ev-btn’).forEach(function(b) {
+b.className = day.evening.indexOf(b.textContent.trim()) !== -1 ? ‘ev-btn sel’ : ‘ev-btn’;
+});
 }
 window.toggleEvening = function(el) {
-  var activity = el.textContent.trim();
-  var idx = day.evening.indexOf(activity);
-  if (idx === -1) day.evening.push(activity); else day.evening.splice(idx, 1);
-  updateEveningBtns();
+var activity = el.textContent.trim();
+var idx = day.evening.indexOf(activity);
+if (idx === -1) day.evening.push(activity); else day.evening.splice(idx, 1);
+updateEveningBtns();
 };
 
 // ── Load day ──
 function loadDay(off) {
-  clearInterval(timerInt); timerInt = null;
-  var entry = null;
-  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === getDateStr(off)) { entry = db.history[i]; break; } }
-  day.sport = entry ? entry.sport : null;
-  day.cs = entry ? entry.cs : 'none';
-  day.csSeconds = entry ? (entry.csSeconds || 0) : 0;
-  day.csRunning = false;
-  day.evening = entry ? (Array.isArray(entry.evening) ? entry.evening : (entry.evening ? [entry.evening] : [])) : [];
-  day.weed = entry ? entry.weed : null;
-  day.note = entry ? (entry.note || '') : '';
-  var dn = document.getElementById('day-note'); if (dn) dn.value = day.note;
-  updateSportBtns(); updateCSBtns(); updateTimer(); updateEveningBtns(); updateWeedBtns(); updateScores();
+clearInterval(timerInt); timerInt = null;
+var entry = null;
+for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === getDateStr(off)) { entry = db.history[i]; break; } }
+day.sport = entry ? entry.sport : null;
+day.cs = entry ? entry.cs : ‘none’;
+day.csSeconds = entry ? (entry.csSeconds || 0) : 0;
+day.csRunning = false;
+day.evening = entry ? (Array.isArray(entry.evening) ? entry.evening : (entry.evening ? [entry.evening] : [])) : [];
+day.weed = entry ? entry.weed : null;
+day.note = entry ? (entry.note || ‘’) : ‘’;
+day.customBlocks = entry ? (entry.customBlocks || {}) : {};
+var dn = document.getElementById(‘day-note’); if (dn) dn.value = day.note;
+updateSportBtns(); updateCSBtns(); updateTimer(); updateEveningBtns(); updateWeedBtns(); updateScores();
 }
 
 // ── Save day ──
 window.saveDay = async function() {
-  var dn = document.getElementById('day-note'); day.note = dn ? dn.value.trim() : '';
-  var pts = calcScore();
-  var today = getDateStr(dayOffset);
-  var d = getDOW(dayOffset);
-  if (day.sport) db.weekSport['d'+d] = true;
-  if (day.weed) db.weekWeed['d'+d] = day.weed;
-  var sportCount = Object.values(db.weekSport).filter(Boolean).length;
-  var blocks = getBlocks();
-  var sb = blocks.find(function(b){return b.type==='sport';});
-  var bonusTarget = sb && sb.weekBonus ? sb.weekBonus.target : 5;
-  var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
-  var bonus = 0;
-  if (sportCount >= bonusTarget && !db.weekBonusGiven) { bonus = bonusPts; db.weekBonusGiven = true; }
-  var entry = { date: today, sport: day.sport, cs: day.cs, csSeconds: day.csSeconds, evening: day.evening.slice(), weed: day.weed, note: day.note, pts: pts };
-  var idx = -1;
-  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === today) { idx = i; break; } }
-  if (idx >= 0) { db.monthScore = Math.max(0, db.monthScore + pts - db.history[idx].pts); db.history[idx] = entry; }
-  else { db.monthScore += pts; db.history.push(entry); }
-  if (bonus > 0) db.monthScore += bonus;
-  updateScores(); updateSportWeek(); updateWeedWeek();
-  await cloudSave();
-  showToast(bonus > 0 ? 'Сохранено · +' + pts + ' оч. + бонус +' + bonusPts + '!' : 'Сохранено · ' + (pts >= 0 ? '+' : '') + pts + ' очков');
+var dn = document.getElementById(‘day-note’); day.note = dn ? dn.value.trim() : ‘’;
+var pts = calcScore();
+var today = getDateStr(dayOffset);
+var d = getDOW(dayOffset);
+if (day.sport) db.weekSport[‘d’+d] = true;
+if (day.weed) db.weekWeed[‘d’+d] = day.weed;
+var sportCount = Object.values(db.weekSport).filter(Boolean).length;
+var blocks = getBlocks();
+var sb = blocks.find(function(b){return b.type===‘sport’;});
+var bonusTarget = sb && sb.weekBonus ? sb.weekBonus.target : 5;
+var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
+var bonus = 0;
+if (sportCount >= bonusTarget && !db.weekBonusGiven) { bonus = bonusPts; db.weekBonusGiven = true; }
+var entry = { date: today, sport: day.sport, cs: day.cs, csSeconds: day.csSeconds, evening: day.evening.slice(), weed: day.weed, note: day.note, customBlocks: day.customBlocks || {}, pts: pts };
+var idx = -1;
+for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === today) { idx = i; break; } }
+if (idx >= 0) { db.monthScore = Math.max(0, db.monthScore + pts - db.history[idx].pts); db.history[idx] = entry; }
+else { db.monthScore += pts; db.history.push(entry); }
+if (bonus > 0) db.monthScore += bonus;
+updateScores(); updateSportWeek(); updateWeedWeek();
+await cloudSave();
+showToast(bonus > 0 ? ‘Сохранено · +’ + pts + ’ оч. + бонус +’ + bonusPts + ‘!’ : ‘Сохранено · ’ + (pts >= 0 ? ‘+’ : ‘’) + pts + ’ очков’);
 };
 
 // ── Nav ──
 window.shiftDay = function(dir) {
-  var next = dayOffset + dir; if (next > 0) return;
-  dayOffset = next; loadDay(dayOffset); updateDayNav();
+var next = dayOffset + dir; if (next > 0) return;
+dayOffset = next; loadDay(dayOffset); updateDayNav();
 };
 
 // ── Tabs ──
 window.showTab = function(tab) {
-  ['today','stats','rewards','history'].forEach(function(t){
-    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
-  });
-  ['today','stats','rewards','history'].forEach(function(t){
-    var el = document.getElementById('tab-btn-'+t);
-    if (el) el.className = t===tab ? 'tab active' : 'tab';
-  });
-  if (tab==='rewards') renderRewards();
-  if (tab==='history') renderHistory();
-  if (tab==='stats') renderStats();
+[‘today’,‘stats’,‘rewards’,‘history’].forEach(function(t){
+document.getElementById(‘tab-’+t).style.display = t===tab ? ‘block’ : ‘none’;
+});
+[‘today’,‘stats’,‘rewards’,‘history’].forEach(function(t){
+var el = document.getElementById(‘tab-btn-’+t);
+if (el) el.className = t===tab ? ‘tab active’ : ‘tab’;
+});
+if (tab===‘rewards’) renderRewards();
+if (tab===‘history’) renderHistory();
+if (tab===‘stats’) renderStats();
 };
 
 // ── Edit mode ──
 window.toggleEditMode = function() {
-  editMode = !editMode;
-  var btn = document.getElementById('edit-mode-btn');
-  btn.className = editMode ? 'edit-mode-btn active' : 'edit-mode-btn';
-  btn.textContent = editMode ? '✓ Готово' : '✏️ Редактировать блоки';
-  renderBlocks();
+editMode = !editMode;
+var btn = document.getElementById(‘edit-mode-btn’);
+btn.className = editMode ? ‘edit-mode-btn active’ : ‘edit-mode-btn’;
+btn.textContent = editMode ? ‘✓ Готово’ : ‘✏️ Редактировать блоки’;
+renderBlocks();
 };
 
 window.moveBlock = function(idx, dir) {
-  var blocks = getBlocks();
-  var newIdx = idx + dir;
-  if (newIdx < 0 || newIdx >= blocks.length) return;
-  var tmp = blocks[idx]; blocks[idx] = blocks[newIdx]; blocks[newIdx] = tmp;
-  setBlocks(blocks);
-  renderBlocks();
+var blocks = getBlocks();
+var newIdx = idx + dir;
+if (newIdx < 0 || newIdx >= blocks.length) return;
+var tmp = blocks[idx]; blocks[idx] = blocks[newIdx]; blocks[newIdx] = tmp;
+setBlocks(blocks);
+renderBlocks();
 };
 
 window.toggleHideBlock = function(id) {
-  var blocks = getBlocks();
-  var b = blocks.find(function(x){return x.id===id;}); if (!b) return;
-  b.hidden = !b.hidden;
-  setBlocks(blocks);
-  renderBlocks();
-  showToast(b.hidden ? 'Блок скрыт' : 'Блок показан');
+var blocks = getBlocks();
+var b = blocks.find(function(x){return x.id===id;}); if (!b) return;
+b.hidden = !b.hidden;
+setBlocks(blocks);
+renderBlocks();
+showToast(b.hidden ? ‘Блок скрыт’ : ‘Блок показан’);
 };
 
 // ── Edit panel ──
 window.openEditPanel = function(id) {
-  var blocks = getBlocks();
-  var b = blocks.find(function(x){return x.id===id;}); if (!b) return;
-  editingBlockId = id;
-  var panel = document.getElementById('edit-panel');
-  var overlay = document.getElementById('edit-overlay');
-  document.getElementById('ep-title').textContent = 'Редактировать: ' + b.title;
-  document.getElementById('ep-body').innerHTML = buildEditPanelHTML(b);
-  panel.style.display = 'block';
-  overlay.classList.add('open');
+var blocks = getBlocks();
+var b = blocks.find(function(x){return x.id===id;}); if (!b) return;
+editingBlockId = id;
+var panel = document.getElementById(‘edit-panel’);
+var overlay = document.getElementById(‘edit-overlay’);
+document.getElementById(‘ep-title’).textContent = ’Редактировать: ’ + b.title;
+document.getElementById(‘ep-body’).innerHTML = buildEditPanelHTML(b);
+panel.style.display = ‘block’;
+overlay.classList.add(‘open’);
 };
 
 window.closeEditPanel = function() {
-  document.getElementById('edit-panel').style.display = 'none';
-  document.getElementById('edit-overlay').classList.remove('open');
-  editingBlockId = null;
+document.getElementById(‘edit-panel’).style.display = ‘none’;
+document.getElementById(‘edit-overlay’).classList.remove(‘open’);
+editingBlockId = null;
 };
 
 function buildEditPanelHTML(b) {
-  var html = '';
+var html = ‘’;
 
-  // Block title
-  html += '<div class="ep-section"><div class="ep-section-label">Название блока</div>' +
-    '<div class="ep-field-row"><input type="text" id="ep-block-title" value="' + escHtml(b.title) + '"></div></div>';
+// Block title
+html += ‘<div class="ep-section"><div class="ep-section-label">Название блока</div>’ +
+‘<div class="ep-field-row"><input type="text" id="ep-block-title" value="' + escHtml(b.title) + '"></div></div>’;
 
-  if (b.type === 'sport') {
-    html += '<div class="ep-section"><div class="ep-section-label">Варианты тренировок</div>' +
-      '<div id="ep-variants-list">';
-    b.variants.forEach(function(v, i) {
-      html += '<div class="ep-variant-row" id="ep-var-'+i+'">' +
-        '<input type="text" value="' + escHtml(v.label) + '" placeholder="Название" id="ep-var-label-'+i+'">' +
-        '<span class="ep-pts-label">очки:</span>' +
-        '<input type="number" value="' + v.pts + '" min="-100" max="100" id="ep-var-pts-'+i+'">' +
-        '<button class="ep-del-btn" onclick="removeVariant('+i+')">✕</button></div>';
-    });
-    html += '</div>' +
-      '<button class="ep-add-btn" onclick="addVariant()">+ Добавить вариант</button></div>';
+if (b.type === ‘sport’) {
+html += ‘<div class="ep-section"><div class="ep-section-label">Варианты тренировок</div>’ +
+‘<div id="ep-variants-list">’;
+b.variants.forEach(function(v, i) {
+html += ‘<div class="ep-variant-row" id="ep-var-'+i+'">’ +
+‘<input type="text" value="' + escHtml(v.label) + '" placeholder="Название" id="ep-var-label-'+i+'">’ +
+‘<span class="ep-pts-label">очки:</span>’ +
+‘<input type="number" value="' + v.pts + '" min="-100" max="100" id="ep-var-pts-'+i+'">’ +
+‘<button class="ep-del-btn" onclick="removeVariant('+i+')">✕</button></div>’;
+});
+html += ‘</div>’ +
+‘<button class="ep-add-btn" onclick="addVariant()">+ Добавить вариант</button></div>’;
 
-    html += '<div class="ep-section"><div class="ep-section-label">Недельный бонус</div>' +
-      '<div class="ep-field-row"><label>Дней для бонуса</label>' +
-      '<input type="number" value="' + (b.weekBonus?b.weekBonus.target:5) + '" min="1" max="7" id="ep-bonus-target"></div>' +
-      '<div class="ep-field-row"><label>Очков за бонус</label>' +
-      '<input type="number" value="' + (b.weekBonus?b.weekBonus.pts:30) + '" min="0" max="200" id="ep-bonus-pts"></div></div>';
-  }
+```
+html += '<div class="ep-section"><div class="ep-section-label">Недельный бонус</div>' +
+  '<div class="ep-field-row"><label>Дней для бонуса</label>' +
+  '<input type="number" value="' + (b.weekBonus?b.weekBonus.target:5) + '" min="1" max="7" id="ep-bonus-target"></div>' +
+  '<div class="ep-field-row"><label>Очков за бонус</label>' +
+  '<input type="number" value="' + (b.weekBonus?b.weekBonus.pts:30) + '" min="0" max="200" id="ep-bonus-pts"></div></div>';
+```
 
-  if (b.type === 'cs') {
-    html += '<div class="ep-section"><div class="ep-section-label">Параметры</div>' +
-      '<div class="ep-field-row"><label>Лимит (минут)</label><input type="number" value="'+(b.limitMinutes||90)+'" min="1" max="600" id="ep-cs-limit"></div>' +
-      '<div class="ep-field-row"><label>Не играл (очки)</label><input type="number" value="'+(b.ptsOff||10)+'" min="-100" max="100" id="ep-cs-off"></div>' +
-      '<div class="ep-field-row"><label>В лимите (очки)</label><input type="number" value="'+(b.ptsOk||5)+'" min="-100" max="100" id="ep-cs-ok"></div>' +
-      '<div class="ep-field-row"><label>Перебор (очки)</label><input type="number" value="'+(b.ptsOver||-10)+'" min="-100" max="100" id="ep-cs-over"></div></div>';
-  }
+}
 
-  if (b.type === 'weed') {
-    html += '<div class="ep-section"><div class="ep-section-label">Параметры</div>' +
-      '<div class="ep-field-row"><label>Не курил (очки/день)</label><input type="number" value="'+(b.ptsClean||20)+'" min="0" max="200" id="ep-weed-clean"></div>' +
-      '<div class="ep-field-row"><label>Курил (штраф)</label><input type="number" value="'+(b.ptsDirty||-10)+'" min="-200" max="0" id="ep-weed-dirty"></div></div>';
-  }
+if (b.type === ‘cs’) {
+html += ‘<div class="ep-section"><div class="ep-section-label">Параметры</div>’ +
+‘<div class="ep-field-row"><label>Лимит (минут)</label><input type="number" value="'+(b.limitMinutes||90)+'" min="1" max="600" id="ep-cs-limit"></div>’ +
+‘<div class="ep-field-row"><label>Не играл (очки)</label><input type="number" value="'+(b.ptsOff||10)+'" min="-100" max="100" id="ep-cs-off"></div>’ +
+‘<div class="ep-field-row"><label>В лимите (очки)</label><input type="number" value="'+(b.ptsOk||5)+'" min="-100" max="100" id="ep-cs-ok"></div>’ +
+‘<div class="ep-field-row"><label>Перебор (очки)</label><input type="number" value="'+(b.ptsOver||-10)+'" min="-100" max="100" id="ep-cs-over"></div></div>’;
+}
 
-  if (b.type === 'multi') {
-    html += '<div class="ep-section"><div class="ep-section-label">Варианты активностей</div>' +
-      '<div id="ep-variants-list">';
-    b.variants.forEach(function(v, i) {
-      html += '<div class="ep-variant-row" id="ep-var-'+i+'">' +
-        '<input type="text" value="' + escHtml(v.label) + '" placeholder="Название" id="ep-var-label-'+i+'">' +
-        '<button class="ep-del-btn" onclick="removeVariant('+i+')">✕</button></div>';
-    });
-    html += '</div><button class="ep-add-btn" onclick="addVariant()">+ Добавить вариант</button></div>';
-  }
+if (b.type === ‘weed’) {
+html += ‘<div class="ep-section"><div class="ep-section-label">Параметры</div>’ +
+‘<div class="ep-field-row"><label>Не курил (очки/день)</label><input type="number" value="'+(b.ptsClean||20)+'" min="0" max="200" id="ep-weed-clean"></div>’ +
+‘<div class="ep-field-row"><label>Курил (штраф)</label><input type="number" value="'+(b.ptsDirty||-10)+'" min="-200" max="0" id="ep-weed-dirty"></div></div>’;
+}
 
-  html += '<button class="ep-save-btn" onclick="saveEditPanel()">Сохранить</button>';
-  return html;
+if (b.type === ‘multi’) {
+html += ‘<div class="ep-section"><div class="ep-section-label">Варианты активностей</div>’ +
+‘<div id="ep-variants-list">’;
+b.variants.forEach(function(v, i) {
+html += ‘<div class="ep-variant-row" id="ep-var-'+i+'">’ +
+‘<input type="text" value="' + escHtml(v.label) + '" placeholder="Название" id="ep-var-label-'+i+'">’ +
+‘<button class="ep-del-btn" onclick="removeVariant('+i+')">✕</button></div>’;
+});
+html += ‘</div><button class="ep-add-btn" onclick="addVariant()">+ Добавить вариант</button></div>’;
+}
+
+html += ‘<button class="ep-save-btn" onclick="saveEditPanel()">Сохранить</button>’;
+// Удаление блока — только не для встроенных типов
+html += ‘<button class="ep-danger-btn" onclick="deleteBlock(\'' + b.id + '\')">🗑 Удалить блок</button>’;
+return html;
 }
 
 window.addVariant = function() {
-  var blocks = getBlocks();
-  var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
-  // Read current values first
-  saveVariantsToBlock(b);
-  b.variants.push(b.type === 'sport' ? { key: 'v'+Date.now(), label: '', pts: 10 } : { label: '' });
-  setBlocks(blocks);
-  document.getElementById('ep-body').innerHTML = buildEditPanelHTML(b);
+var blocks = getBlocks();
+var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
+// Read current values first
+saveVariantsToBlock(b);
+b.variants.push(b.type === ‘sport’ ? { key: ‘v’+Date.now(), label: ‘’, pts: 10 } : { label: ‘’ });
+setBlocks(blocks);
+document.getElementById(‘ep-body’).innerHTML = buildEditPanelHTML(b);
 };
 
 window.removeVariant = function(idx) {
-  var blocks = getBlocks();
-  var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
-  saveVariantsToBlock(b);
-  b.variants.splice(idx, 1);
-  setBlocks(blocks);
-  document.getElementById('ep-body').innerHTML = buildEditPanelHTML(b);
+var blocks = getBlocks();
+var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
+saveVariantsToBlock(b);
+b.variants.splice(idx, 1);
+setBlocks(blocks);
+document.getElementById(‘ep-body’).innerHTML = buildEditPanelHTML(b);
 };
 
 function saveVariantsToBlock(b) {
-  if (!b.variants) return;
-  b.variants.forEach(function(v, i) {
-    var labelEl = document.getElementById('ep-var-label-'+i);
-    var ptsEl = document.getElementById('ep-var-pts-'+i);
-    if (labelEl) v.label = labelEl.value;
-    if (ptsEl) v.pts = parseInt(ptsEl.value) || 0;
-  });
+if (!b.variants) return;
+b.variants.forEach(function(v, i) {
+var labelEl = document.getElementById(‘ep-var-label-’+i);
+var ptsEl = document.getElementById(‘ep-var-pts-’+i);
+if (labelEl) v.label = labelEl.value;
+if (ptsEl) v.pts = parseInt(ptsEl.value) || 0;
+});
 }
 
 window.saveEditPanel = function() {
-  var blocks = getBlocks();
-  var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
+var blocks = getBlocks();
+var b = blocks.find(function(x){return x.id===editingBlockId;}); if (!b) return;
 
-  var titleEl = document.getElementById('ep-block-title');
-  if (titleEl) b.title = titleEl.value.trim() || b.title;
+var titleEl = document.getElementById(‘ep-block-title’);
+if (titleEl) b.title = titleEl.value.trim() || b.title;
 
-  if (b.type === 'sport') {
-    saveVariantsToBlock(b);
-    var bt = document.getElementById('ep-bonus-target');
-    var bp = document.getElementById('ep-bonus-pts');
-    if (!b.weekBonus) b.weekBonus = {};
-    if (bt) b.weekBonus.target = parseInt(bt.value) || 5;
-    if (bp) b.weekBonus.pts = parseInt(bp.value) || 30;
-  }
+if (b.type === ‘sport’) {
+saveVariantsToBlock(b);
+var bt = document.getElementById(‘ep-bonus-target’);
+var bp = document.getElementById(‘ep-bonus-pts’);
+if (!b.weekBonus) b.weekBonus = {};
+if (bt) b.weekBonus.target = parseInt(bt.value) || 5;
+if (bp) b.weekBonus.pts = parseInt(bp.value) || 30;
+}
 
-  if (b.type === 'cs') {
-    var lim = document.getElementById('ep-cs-limit');
-    var off = document.getElementById('ep-cs-off');
-    var ok = document.getElementById('ep-cs-ok');
-    var over = document.getElementById('ep-cs-over');
-    if (lim) b.limitMinutes = parseInt(lim.value) || 90;
-    if (off) b.ptsOff = parseInt(off.value) || 10;
-    if (ok) b.ptsOk = parseInt(ok.value) || 5;
-    if (over) b.ptsOver = parseInt(over.value) || -10;
-  }
+if (b.type === ‘cs’) {
+var lim = document.getElementById(‘ep-cs-limit’);
+var off = document.getElementById(‘ep-cs-off’);
+var ok = document.getElementById(‘ep-cs-ok’);
+var over = document.getElementById(‘ep-cs-over’);
+if (lim) b.limitMinutes = parseInt(lim.value) || 90;
+if (off) b.ptsOff = parseInt(off.value) || 10;
+if (ok) b.ptsOk = parseInt(ok.value) || 5;
+if (over) b.ptsOver = parseInt(over.value) || -10;
+}
 
-  if (b.type === 'weed') {
-    var clean = document.getElementById('ep-weed-clean');
-    var dirty = document.getElementById('ep-weed-dirty');
-    if (clean) b.ptsClean = parseInt(clean.value) || 20;
-    if (dirty) b.ptsDirty = parseInt(dirty.value) || -10;
-  }
+if (b.type === ‘weed’) {
+var clean = document.getElementById(‘ep-weed-clean’);
+var dirty = document.getElementById(‘ep-weed-dirty’);
+if (clean) b.ptsClean = parseInt(clean.value) || 20;
+if (dirty) b.ptsDirty = parseInt(dirty.value) || -10;
+}
 
-  if (b.type === 'multi') {
-    saveVariantsToBlock(b);
-  }
+if (b.type === ‘multi’) {
+saveVariantsToBlock(b);
+}
 
-  setBlocks(blocks);
-  closeEditPanel();
-  renderBlocks();
-  cloudSave();
-  showToast('Блок обновлён');
+setBlocks(blocks);
+closeEditPanel();
+renderBlocks();
+cloudSave();
+showToast(‘Блок обновлён’);
 };
 
-// ── Rewards ──
+// ── Delete block ──
+window.deleteBlock = function(id) {
+if (!confirm(‘Удалить блок? Данные в истории сохранятся.’)) return;
+var blocks = getBlocks();
+var idx = blocks.findIndex(function(b){return b.id===id;});
+if (idx === -1) return;
+var removed = blocks.splice(idx, 1)[0];
+// Архив удалённых блоков
+if (!db.deletedBlocks) db.deletedBlocks = {};
+db.deletedBlocks[id] = removed;
+setBlocks(blocks);
+closeEditPanel();
+renderBlocks();
+cloudSave();
+showToast(‘Блок удалён’);
+};
+
+// ── Add block panel ──
+var newBlockType = ‘simple’;
+window.openAddBlockPanel = function() {
+newBlockType = ‘simple’;
+editingBlockId = ‘**new**’;
+document.getElementById(‘ep-title’).textContent = ‘Новый блок’;
+document.getElementById(‘ep-body’).innerHTML = buildAddBlockHTML();
+document.getElementById(‘edit-panel’).style.display = ‘block’;
+document.getElementById(‘edit-overlay’).classList.add(‘open’);
+};
+
+window.selectNewBlockType = function(type) {
+newBlockType = type;
+document.getElementById(‘ep-body’).innerHTML = buildAddBlockHTML();
+};
+
+function buildAddBlockHTML() {
+var types = [
+{ key: ‘simple’, label: ‘✓ Кнопки’, desc: ‘Один выбор из вариантов с очками’ },
+{ key: ‘multi’, label: ‘☑ Мультивыбор’, desc: ‘Несколько активностей без очков’ },
+{ key: ‘counter’, label: ‘# Счётчик’, desc: ‘Числовой ввод с очками за единицу’ },
+{ key: ‘note’, label: ‘✏ Заметка’, desc: ‘Текстовое поле без очков’ }
+];
+var html = ‘<div class="ep-section"><div class="ep-section-label">Тип блока</div>’ +
+‘<div class="ep-type-grid">’;
+types.forEach(function(t) {
+html += ‘<button class="ep-type-btn' + (newBlockType===t.key?' sel':'') + '" onclick="selectNewBlockType(\'' + t.key + '\')">’ +
+t.label + ‘<div class="ep-type-desc">’ + t.desc + ‘</div></button>’;
+});
+html += ‘</div></div>’;
+
+html += ‘<div class="ep-section"><div class="ep-section-label">Название блока</div>’ +
+‘<div class="ep-field-row"><input type="text" id="ep-new-title" placeholder="Например: Медитация"></div></div>’;
+
+if (newBlockType === ‘simple’) {
+html += ‘<div class="ep-section"><div class="ep-section-label">Варианты</div>’ +
+‘<div id="ep-new-variants">’ +
+‘<div class="ep-variant-row"><input type="text" id="ep-nv-0" placeholder="Вариант 1"><span class="ep-pts-label">очки:</span><input type="number" id="ep-np-0" value="10" style="width:52px;border:1.5px solid #e0e0e0;border-radius:8px;padding:4px 6px;font-size:13px;text-align:center;"></div>’ +
+‘</div>’ +
+‘<button class="ep-add-btn" onclick="addNewVariant()">+ Добавить вариант</button></div>’;
+}
+
+if (newBlockType === ‘counter’) {
+html += ‘<div class="ep-section"><div class="ep-section-label">Параметры</div>’ +
+‘<div class="ep-field-row"><label>Единица измерения</label><input type="text" id="ep-new-unit" placeholder="мин / раз / км" style="width:80px;"></div>’ +
+‘<div class="ep-field-row"><label>Очков за единицу</label><input type="number" id="ep-new-pts-per" value="1" min="-10" max="50"></div>’ +
+‘<div class="ep-field-row"><label>Макс. значение</label><input type="number" id="ep-new-max" value="60" min="1"></div></div>’;
+}
+
+html += ‘<button class="ep-save-btn" onclick="confirmAddBlock()">Создать блок</button>’;
+return html;
+};
+
+var _newVarCount = 1;
+window.addNewVariant = function() {
+var container = document.getElementById(‘ep-new-variants’); if (!container) return;
+var i = container.children.length;
+var row = document.createElement(‘div’);
+row.className = ‘ep-variant-row’;
+row.innerHTML = ‘<input type="text" id="ep-nv-' + i + '" placeholder="Вариант ' + (i+1) + '">’ +
+‘<span class="ep-pts-label">очки:</span>’ +
+‘<input type="number" id="ep-np-' + i + '" value="10" style="width:52px;border:1.5px solid #e0e0e0;border-radius:8px;padding:4px 6px;font-size:13px;text-align:center;">’ +
+‘<button class="ep-del-btn" onclick="this.parentNode.remove()">✕</button>’;
+container.appendChild(row);
+};
+
+window.confirmAddBlock = function() {
+var titleEl = document.getElementById(‘ep-new-title’);
+var title = titleEl ? titleEl.value.trim() : ‘’;
+if (!title) { showToast(‘Введи название блока’); return; }
+
+var id = ‘block_’ + Date.now();
+var newBlock = { id: id, title: title, hidden: false, type: newBlockType };
+
+if (newBlockType === ‘simple’) {
+var varContainer = document.getElementById(‘ep-new-variants’);
+var variants = [];
+if (varContainer) {
+varContainer.querySelectorAll(’.ep-variant-row’).forEach(function(row, i) {
+var lbl = row.querySelector(‘input[type=text]’);
+var pts = row.querySelector(‘input[type=number]’);
+if (lbl && lbl.value.trim()) {
+variants.push({ key: ‘v’+i+’_’+Date.now(), label: lbl.value.trim(), pts: parseInt(pts?pts.value:10)||10 });
+}
+});
+}
+if (!variants.length) { showToast(‘Добавь хотя бы один вариант’); return; }
+newBlock.variants = variants;
+newBlock.subtitle = title;
+}
+
+if (newBlockType === ‘multi’) {
+newBlock.variants = [{ label: ‘Активность 1’ }];
+newBlock.subtitle = title;
+}
+
+if (newBlockType === ‘counter’) {
+var unit = document.getElementById(‘ep-new-unit’);
+var ptsper = document.getElementById(‘ep-new-pts-per’);
+var maxv = document.getElementById(‘ep-new-max’);
+newBlock.unit = unit ? unit.value.trim() : ‘’;
+newBlock.ptsPerUnit = parseInt(ptsper?ptsper.value:1)||1;
+newBlock.maxValue = parseInt(maxv?maxv.value:60)||60;
+newBlock.subtitle = title;
+}
+
+if (newBlockType === ‘note’) {
+newBlock.subtitle = title;
+}
+
+var blocks = getBlocks();
+blocks.push(newBlock);
+setBlocks(blocks);
+closeEditPanel();
+renderBlocks();
+cloudSave();
+showToast(‘Блок «’ + title + ‘» создан’);
+};
 function renderRewards() {
-  var list = document.getElementById('rewards-list'); if (!list) return;
-  list.innerHTML = REWARDS.map(function(r) {
-    var done = db.monthScore >= r.pts; var pct = Math.min(100, Math.round(db.monthScore / r.pts * 100));
-    return '<div class="reward-row"><div class="reward-header"><span class="reward-name'+(done?' done':'')+'">'+( done?'✓ ':'')+r.name+'</span><span class="reward-pts'+(done?' done':'')+'">' +r.pts+' оч.</span></div><div class="reward-bar-wrap"><div class="reward-bar-fill'+(done?' done':'')+'" style="width:'+pct+'%"></div></div></div>';
-  }).join('');
+var list = document.getElementById(‘rewards-list’); if (!list) return;
+list.innerHTML = REWARDS.map(function(r) {
+var done = db.monthScore >= r.pts; var pct = Math.min(100, Math.round(db.monthScore / r.pts * 100));
+return ‘<div class="reward-row"><div class="reward-header"><span class="reward-name'+(done?' done':'')+'">’+( done?‘✓ ‘:’’)+r.name+’</span><span class="reward-pts'+(done?' done':'')+'">’ +r.pts+’ оч.</span></div><div class="reward-bar-wrap"><div class="reward-bar-fill'+(done?' done':'')+'" style="width:'+pct+'%"></div></div></div>’;
+}).join(’’);
 }
 
 // ── History ──
 function renderHistory() {
-  var list = document.getElementById('history-list'); if (!list) return;
-  if (!db.history.length) { list.innerHTML = '<div class="empty-state">Нет записей</div>'; return; }
-  var SL = {}; var blocks = getBlocks();
-  var sb = blocks.find(function(b){return b.type==='sport';});
-  if (sb) sb.variants.forEach(function(v){ SL[v.key] = v.label; });
-  var CL = { off:'нет', ok:'лимит', over:'перебор', none:'—' };
-  var rows = db.history.slice(-30).reverse();
-  list.innerHTML = rows.map(function(h) {
-    var ev = Array.isArray(h.evening) ? h.evening.join(', ') : (h.evening || '—');
-    var noteHtml = h.note ? '<div class="history-note">' + escHtml(h.note) + '</div>' : '';
-    return '<div class="history-row"><div class="history-top"><div><div class="history-date">'+fmtDate(h.date)+'</div><div class="history-detail">'+(SL[h.sport]||h.sport||'—')+' · КС: '+(CL[h.cs]||'—')+'</div><div class="history-detail">'+escHtml(ev)+'</div>'+noteHtml+'</div><div style="display:flex;align-items:center;gap:10px;"><div class="history-pts '+(h.pts>=0?'pos':'neg')+'">'+(h.pts>=0?'+':'')+h.pts+'</div><button onclick="deleteDay(\''+h.date+'\')" style="background:none;border:none;font-size:16px;color:#ccc;cursor:pointer;padding:4px;line-height:1;">✕</button></div></div></div>';
-  }).join('');
+var list = document.getElementById(‘history-list’); if (!list) return;
+if (!db.history.length) { list.innerHTML = ‘<div class="empty-state">Нет записей</div>’; return; }
+var SL = {}; var blocks = getBlocks();
+var sb = blocks.find(function(b){return b.type===‘sport’;});
+if (sb) sb.variants.forEach(function(v){ SL[v.key] = v.label; });
+var CL = { off:‘нет’, ok:‘лимит’, over:‘перебор’, none:’—’ };
+var rows = db.history.slice(-30).reverse();
+list.innerHTML = rows.map(function(h) {
+var ev = Array.isArray(h.evening) ? h.evening.join(’, ‘) : (h.evening || ‘—’);
+var noteHtml = h.note ? ‘<div class="history-note">’ + escHtml(h.note) + ‘</div>’ : ‘’;
+return ‘<div class="history-row"><div class="history-top"><div><div class="history-date">’+fmtDate(h.date)+’</div><div class="history-detail">’+(SL[h.sport]||h.sport||’—’)+’ · КС: ‘+(CL[h.cs]||’—’)+’</div><div class="history-detail">’+escHtml(ev)+’</div>’+noteHtml+’</div><div style="display:flex;align-items:center;gap:10px;"><div class="history-pts '+(h.pts>=0?'pos':'neg')+'">’+(h.pts>=0?’+’:’’)+h.pts+’</div><button onclick="deleteDay(\''+h.date+'\')" style="background:none;border:none;font-size:16px;color:#ccc;cursor:pointer;padding:4px;line-height:1;">✕</button></div></div></div>’;
+}).join(’’);
 }
 
 window.deleteDay = async function(dateStr) {
-  if (!confirm('Удалить запись за ' + fmtDate(dateStr) + '?')) return;
-  var idx = -1;
-  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === dateStr) { idx = i; break; } }
-  if (idx === -1) return;
-  var pts = db.history[idx].pts;
-  db.monthScore = Math.max(0, db.monthScore - pts);
-  db.history.splice(idx, 1);
-  await cloudSave();
-  renderHistory();
-  updateScores();
-  showToast('Запись удалена');
+if (!confirm(’Удалить запись за ’ + fmtDate(dateStr) + ‘?’)) return;
+var idx = -1;
+for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === dateStr) { idx = i; break; } }
+if (idx === -1) return;
+var entry = db.history[idx];
+db.monthScore = Math.max(0, db.monthScore - entry.pts);
+db.history.splice(idx, 1);
+
+// Пересчитать weekSport и weekWeed из оставшейся истории
+var wk = getWeekKey();
+db.weekSport = {}; db.weekWeed = {};
+db.history.forEach(function(h) {
+if (h.date < wk) return; // не из этой недели
+var dow = dateToDOW(h.date);
+if (dow === null) return;
+if (h.sport) db.weekSport[‘d’+dow] = true;
+if (h.weed) db.weekWeed[‘d’+dow] = h.weed;
+});
+
+await cloudSave();
+renderHistory();
+updateScores();
+updateSportWeek();
+updateWeedWeek();
+showToast(‘Запись удалена’);
 };
 
 // ── Stats ──
 function renderStats() {
-  var d = new Date(); var mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-  var me = db.history.filter(function(h) { return h.date.startsWith(mk); });
-  var sg = document.getElementById('stats-grid'); if (!sg) return;
-  sg.innerHTML = [
-    { val: me.length, label: 'Дней записано' },
-    { val: me.filter(function(h){return h.sport;}).length, label: 'Дней спорта' },
-    { val: me.filter(function(h){return h.cs==='ok'||h.cs==='off';}).length, label: 'КС в лимите' },
-    { val: me.filter(function(h){return h.weed==='no';}).length + ' / ' + me.length, label: 'Без травы (будн.)' }
-  ].map(function(s) { return '<div class="stat-card"><div class="stat-val">'+s.val+'</div><div class="stat-label">'+s.label+'</div></div>'; }).join('');
-  renderCalendar(); renderWeekSummary();
+var d = new Date(); var mk = d.getFullYear() + ‘-’ + String(d.getMonth()+1).padStart(2,‘0’);
+var me = db.history.filter(function(h) { return h.date.startsWith(mk); });
+var sg = document.getElementById(‘stats-grid’); if (!sg) return;
+sg.innerHTML = [
+{ val: me.length, label: ‘Дней записано’ },
+{ val: me.filter(function(h){return h.sport;}).length, label: ‘Дней спорта’ },
+{ val: me.filter(function(h){return h.cs===‘ok’||h.cs===‘off’;}).length, label: ‘КС в лимите’ },
+{ val: me.filter(function(h){return h.weed===‘no’;}).length + ’ / ’ + me.length, label: ‘Без травы (будн.)’ }
+].map(function(s) { return ‘<div class="stat-card"><div class="stat-val">’+s.val+’</div><div class="stat-label">’+s.label+’</div></div>’; }).join(’’);
+renderCalendar(); renderWeekSummary();
 }
 
 function renderCalendar() {
-  var grid = document.getElementById('cal-grid'); if (!grid) return;
-  var d = new Date(); var year = d.getFullYear(); var month = d.getMonth(); var today = d.getDate();
-  var firstDay = new Date(year, month, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1;
-  var daysInMonth = new Date(year, month+1, 0).getDate();
-  var mk = year + '-' + String(month+1).padStart(2,'0');
-  var entryMap = {};
-  db.history.filter(function(h){return h.date.startsWith(mk);}).forEach(function(h){ entryMap[parseInt(h.date.split('-')[2])] = h.pts; });
-  var html = '';
-  for (var i = 0; i < firstDay; i++) html += '<div class="cal-day filler"></div>';
-  for (var i = 1; i <= daysInMonth; i++) {
-    var pts = entryMap[i]; var cls = 'cal-day';
-    if (pts !== undefined) cls += pts >= 0 ? ' has-data' : ' has-data neg';
-    else cls += ' empty-day';
-    if (i === today) cls += ' today-dot';
-    html += '<div class="'+cls+'">'+(pts !== undefined ? (pts>0?'+':'')+pts : i)+'</div>';
-  }
-  grid.innerHTML = html;
+var grid = document.getElementById(‘cal-grid’); if (!grid) return;
+var d = new Date(); var year = d.getFullYear(); var month = d.getMonth(); var today = d.getDate();
+var firstDay = new Date(year, month, 1).getDay(); firstDay = firstDay === 0 ? 6 : firstDay - 1;
+var daysInMonth = new Date(year, month+1, 0).getDate();
+var mk = year + ‘-’ + String(month+1).padStart(2,‘0’);
+var entryMap = {};
+db.history.filter(function(h){return h.date.startsWith(mk);}).forEach(function(h){ entryMap[parseInt(h.date.split(’-’)[2])] = h.pts; });
+var html = ‘’;
+for (var i = 0; i < firstDay; i++) html += ‘<div class="cal-day filler"></div>’;
+for (var i = 1; i <= daysInMonth; i++) {
+var pts = entryMap[i]; var cls = ‘cal-day’;
+if (pts !== undefined) cls += pts >= 0 ? ’ has-data’ : ’ has-data neg’;
+else cls += ’ empty-day’;
+if (i === today) cls += ’ today-dot’;
+html += ‘<div class="'+cls+'">’+(pts !== undefined ? (pts>0?’+’:’’)+pts : i)+’</div>’;
+}
+grid.innerHTML = html;
 }
 
 function renderWeekSummary() {
-  var ws = document.getElementById('week-summary'); if (!ws) return;
-  var sportCount = Object.values(db.weekSport).filter(Boolean).length;
-  var weedPts = calcWeedPts();
-  var blocks = getBlocks();
-  var sb = blocks.find(function(b){return b.type==='sport';});
-  var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
-  var sportPts = sportCount * 10 + (db.weekBonusGiven ? bonusPts : 0);
-  var wk = getWeekKey();
-  var csPts = db.history.filter(function(h){return h.date>=wk;}).reduce(function(a,h){
-    var cb = blocks.find(function(b){return b.type==='cs';});
-    var off = cb ? (cb.ptsOff||10) : 10;
-    var ok = cb ? (cb.ptsOk||5) : 5;
-    var over = cb ? (cb.ptsOver||-10) : -10;
-    if(h.cs==='off') return a+off; if(h.cs==='ok') return a+ok; if(h.cs==='over') return a+over; return a;
-  }, 0);
-  var total = sportPts + csPts + weedPts;
-  ws.innerHTML = '<div class="week-summary-title">Неделя с ' + fmtDate(wk) + '</div>' +
-    [['Спорт', sportCount+'/5 · '+sportPts+' оч.'],['КС', csPts+' оч.'],['Трава', weedPts+' оч.'],['Итого', total+' оч.']].map(function(r){
-      return '<div class="week-summary-row"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';
-    }).join('');
+var ws = document.getElementById(‘week-summary’); if (!ws) return;
+var sportCount = Object.values(db.weekSport).filter(Boolean).length;
+var weedPts = calcWeedPts();
+var blocks = getBlocks();
+var sb = blocks.find(function(b){return b.type===‘sport’;});
+var bonusPts = sb && sb.weekBonus ? sb.weekBonus.pts : 30;
+var sportPts = sportCount * 10 + (db.weekBonusGiven ? bonusPts : 0);
+var wk = getWeekKey();
+var csPts = db.history.filter(function(h){return h.date>=wk;}).reduce(function(a,h){
+var cb = blocks.find(function(b){return b.type===‘cs’;});
+var off = cb ? (cb.ptsOff||10) : 10;
+var ok = cb ? (cb.ptsOk||5) : 5;
+var over = cb ? (cb.ptsOver||-10) : -10;
+if(h.cs===‘off’) return a+off; if(h.cs===‘ok’) return a+ok; if(h.cs===‘over’) return a+over; return a;
+}, 0);
+var total = sportPts + csPts + weedPts;
+ws.innerHTML = ‘<div class="week-summary-title">Неделя с ’ + fmtDate(wk) + ‘</div>’ +
+[[‘Спорт’, sportCount+’/5 · ‘+sportPts+’ оч.’],[‘КС’, csPts+’ оч.’],[‘Трава’, weedPts+’ оч.’],[‘Итого’, total+’ оч.’]].map(function(r){
+return ‘<div class="week-summary-row"><span>’+r[0]+’</span><span>’+r[1]+’</span></div>’;
+}).join(’’);
 }
 
 // ── Export ──
 window.exportCSV = function() {
-  if (!db.history.length) { showToast('Нет данных'); return; }
-  var blocks = getBlocks();
-  var sb = blocks.find(function(b){return b.type==='sport';});
-  var SL = {};
-  if (sb) sb.variants.forEach(function(v){ SL[v.key] = v.label; });
-  var CL = { off:'не играл', ok:'в лимите', over:'перебор', none:'—' };
-  var rows = ['Дата,Спорт,КС,Активность,Трава,Очки,Заметка'];
-  db.history.forEach(function(h) {
-    var ev = Array.isArray(h.evening) ? h.evening.join('|') : (h.evening||'');
-    rows.push([h.date,SL[h.sport]||h.sport||'—',CL[h.cs]||'—',ev,h.weed||'—',h.pts,(h.note||'').replace(/,/g,' ')].join(','));
-  });
-  var blob = new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
-  var url = URL.createObjectURL(blob); var a = document.createElement('a');
-  a.href = url; a.download = 'habits_'+getMonthKey()+'.csv'; a.click(); URL.revokeObjectURL(url);
-  showToast('CSV скачан');
+if (!db.history.length) { showToast(‘Нет данных’); return; }
+var blocks = getBlocks();
+var sb = blocks.find(function(b){return b.type===‘sport’;});
+var SL = {};
+if (sb) sb.variants.forEach(function(v){ SL[v.key] = v.label; });
+var CL = { off:‘не играл’, ok:‘в лимите’, over:‘перебор’, none:’—’ };
+var rows = [‘Дата,Спорт,КС,Активность,Трава,Очки,Заметка’];
+db.history.forEach(function(h) {
+var ev = Array.isArray(h.evening) ? h.evening.join(’|’) : (h.evening||’’);
+rows.push([h.date,SL[h.sport]||h.sport||’—’,CL[h.cs]||’—’,ev,h.weed||’—’,h.pts,(h.note||’’).replace(/,/g,’ ‘)].join(’,’));
+});
+var blob = new Blob([rows.join(’\n’)],{type:‘text/csv;charset=utf-8;’});
+var url = URL.createObjectURL(blob); var a = document.createElement(‘a’);
+a.href = url; a.download = ‘habits_’+getMonthKey()+’.csv’; a.click(); URL.revokeObjectURL(url);
+showToast(‘CSV скачан’);
 };
 
 // ── Init ──
@@ -1095,11 +1332,11 @@ updateDayNav();
 initFirebase();
 // fallback если Firebase не загрузится за 4 сек
 setTimeout(function() {
-  if (!document.getElementById('blocks-container').innerHTML) {
-    localLoad();
-    updateScores(); renderBlocks(); updateSportWeek(); updateWeedWeek(); loadDay(0);
-    setSyncStatus('err', '⚠ локальный режим');
-  }
+if (!document.getElementById(‘blocks-container’).innerHTML) {
+localLoad();
+updateScores(); renderBlocks(); updateSportWeek(); updateWeedWeek(); loadDay(0);
+setSyncStatus(‘err’, ‘⚠ локальный режим’);
+}
 }, 4000);
 </script>
 
