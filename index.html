@@ -580,9 +580,23 @@ function renderHistory() {
   list.innerHTML = rows.map(function(h) {
     var ev = Array.isArray(h.evening) ? h.evening.join(', ') : (h.evening || '—');
     var noteHtml = h.note ? '<div class="history-note">' + h.note + '</div>' : '';
-    return '<div class="history-row"><div class="history-top"><div><div class="history-date">'+fmtDate(h.date)+'</div><div class="history-detail">'+(SL[h.sport]||'—')+' · КС: '+(CL[h.cs]||'—')+'</div><div class="history-detail">'+ev+'</div>'+noteHtml+'</div><div class="history-pts '+(h.pts>=0?'pos':'neg')+'">'+(h.pts>=0?'+':'')+h.pts+'</div></div></div>';
+    return '<div class="history-row"><div class="history-top"><div><div class="history-date">'+fmtDate(h.date)+'</div><div class="history-detail">'+(SL[h.sport]||'—')+' · КС: '+(CL[h.cs]||'—')+'</div><div class="history-detail">'+ev+'</div>'+noteHtml+'</div><div style="display:flex;align-items:center;gap:10px;"><div class="history-pts '+(h.pts>=0?'pos':'neg')+'">'+(h.pts>=0?'+':'')+h.pts+'</div><button onclick="deleteDay(\''+h.date+'\')" style="background:none;border:none;font-size:16px;color:#ccc;cursor:pointer;padding:4px;line-height:1;">✕</button></div></div></div>';
   }).join('');
 }
+
+window.deleteDay = async function(dateStr) {
+  if (!confirm('Удалить запись за ' + fmtDate(dateStr) + '?')) return;
+  var idx = -1;
+  for (var i = 0; i < db.history.length; i++) { if (db.history[i].date === dateStr) { idx = i; break; } }
+  if (idx === -1) return;
+  var pts = db.history[idx].pts;
+  db.monthScore = Math.max(0, db.monthScore - pts);
+  db.history.splice(idx, 1);
+  await cloudSave();
+  renderHistory();
+  updateScores();
+  showToast('Запись удалена');
+};
 
 function renderStats() {
   var d = new Date(); var mk = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
