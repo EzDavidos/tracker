@@ -368,21 +368,26 @@ let editingBlockData = null;
 let blocks = JSON.parse(JSON.stringify(DEFAULT_BLOCKS));
 
 // ── AUTH ──
-onAuthStateChanged(auth, async user => {
-  // check redirect result first
-  try {
-    var result = await getRedirectResult(auth);
-    if (result && result.user) user = result.user;
-  } catch(e) {}
+function initApp(user) {
+  currentUser = user;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('user-avatar').src = user.photoURL || '';
+  document.getElementById('user-name').textContent = user.displayName ? user.displayName.split(' ')[0] : '';
+  document.getElementById('header-name').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Трекер';
+  updateHeader();
+  updateDayNav();
+  cloudLoad();
+}
 
+// Handle redirect result on page load
+getRedirectResult(auth).then(result => {
+  if (result && result.user) initApp(result.user);
+}).catch(e => { console.error('redirect error', e); });
+
+onAuthStateChanged(auth, user => {
   if (user) {
-    currentUser = user;
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    document.getElementById('user-avatar').src = user.photoURL || '';
-    document.getElementById('user-name').textContent = user.displayName ? user.displayName.split(' ')[0] : '';
-    document.getElementById('header-name').textContent = user.displayName ? user.displayName.split(' ')[0] : 'Трекер';
-    cloudLoad();
+    initApp(user);
   } else {
     currentUser = null;
     document.getElementById('auth-screen').style.display = 'flex';
@@ -390,8 +395,8 @@ onAuthStateChanged(auth, async user => {
   }
 });
 
-window.signInGoogle = async function() {
-  try { await signInWithRedirect(auth, provider); } catch(e) { showToast('Ошибка входа'); }
+window.signInGoogle = function() {
+  signInWithRedirect(auth, provider).catch(e => { showToast('Ошибка: ' + e.message); });
 };
 window.signOut = async function() {
   if (confirm('Выйти из аккаунта?')) { await fbSignOut(auth); }
@@ -1033,9 +1038,6 @@ if (tab===‘rewards’) renderRewards();
 if (tab===‘history’) renderHistory();
 if (tab===‘stats’) renderStats();
 };
-
-updateHeader();
-updateDayNav();
 </script>
 
 </body>
