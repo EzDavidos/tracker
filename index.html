@@ -248,44 +248,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Firebase stub (работает и в Claude-артефакте, и на GitHub Pages без module)
-// На реальном деплое замени этот блок на настоящий Firebase import
-var _fbReady = false;
-var _fsdb = null;
-
-function initFirebase() {
-  // Попытка загрузить Firebase динамически
-  var s1 = document.createElement('script');
-  s1.type = 'module';
-  s1.textContent = `
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    const cfg = {
-      apiKey:"AIzaSyARFzVkmek4o8qQwEi591VKX9M0isQeUmI",
-      authDomain:"david-tracker.firebaseapp.com",
-      projectId:"david-tracker",
-      storageBucket:"david-tracker.firebasestorage.app",
-      messagingSenderId:"309665468941",
-      appId:"1:309665468941:web:0eaa5b7da3b197dd17bb44"
-    };
-    try {
-      const app = initializeApp(cfg);
-      const db = getFirestore(app);
-      window.__fbdb = db;
-      window.__fbDoc = doc;
-      window.__fbGetDoc = getDoc;
-      window.__fbSetDoc = setDoc;
-      window.__fbReady = true;
-      window.onFirebaseReady && window.onFirebaseReady();
-    } catch(e) { window.__fbReady = false; window.onFirebaseReady && window.onFirebaseReady(); }
-  `;
-  document.head.appendChild(s1);
-}
-
-window.onFirebaseReady = function() {
-  cloudLoad();
-};
-
 // ── Constants ──
 var REWARDS = [
   { pts: 100, name: 'Минимальная планка' },
@@ -635,9 +597,8 @@ function renderSimpleBlock(b) {
 
 function renderCounterBlock(b) {
   var saved = (day.customBlocks && day.customBlocks[b.id]) ? day.customBlocks[b.id] : 0;
-  var pts = saved * (b.ptsPerUnit||1);
   return '<div class="row"><div><div class="item-label">' + escHtml(b.subtitle||b.title) + '</div>' +
-    '<div class="item-sub" id="sub-' + b.id + '">' + saved + ' ' + escHtml(b.unit||'') + ' · ' + (pts>=0?'+':'') + pts + ' оч.</div></div></div>' +
+    '<div class="item-sub" id="sub-' + b.id + '">' + (saved ? saved + ' ' + escHtml(b.unit||'') : '') + '</div></div></div>' +
     '<div class="manual-row" style="margin-top:12px;">' +
     '<input type="number" id="cnt-' + b.id + '" min="0" max="' + (b.maxValue||999) + '" value="' + saved + '" style="width:80px;padding:6px 8px;border-radius:10px;border:1.5px solid #e0e0e0;font-size:15px;text-align:center;">' +
     '<span style="font-size:12px;color:#999;">' + escHtml(b.unit||'') + '</span>' +
